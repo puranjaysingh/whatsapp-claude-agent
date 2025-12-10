@@ -346,6 +346,32 @@ Notes:
 - Use either `systemPrompt` (replaces default) OR `systemPromptAppend` (adds to default), not both
 - `model` supports shorthands like `opus`, `sonnet`, `haiku`, or full model IDs
 
+### CLI Config Management
+
+Manage configuration without running the agent:
+
+```bash
+# Initialize new config file
+whatsapp-claude-agent config init "+1234567890"
+
+# View current config
+whatsapp-claude-agent config show
+whatsapp-claude-agent config show --json
+
+# Get/set individual values
+whatsapp-claude-agent config get model
+whatsapp-claude-agent config set model opus
+whatsapp-claude-agent config set whitelist "+111,+222"
+whatsapp-claude-agent config unset maxTurns
+
+# Import/export
+whatsapp-claude-agent config export > backup.json
+whatsapp-claude-agent config import backup.json --merge
+
+# Specify config location
+whatsapp-claude-agent config -d /path/to/project show
+```
+
 ## Security Considerations
 
 1. **Whitelist enforcement**: Only numbers in the whitelist can interact with the agent

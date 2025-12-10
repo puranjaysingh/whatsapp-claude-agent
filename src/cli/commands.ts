@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import { version } from '../../package.json'
 import { buildInfo, getBuildInfoString } from '../build-info.ts'
 import { loadConfigFile, parseConfig, type CLIOptions } from './config.ts'
+import { createConfigCommand } from './config-commands.ts'
 import type { Config } from '../types.ts'
 
 export function createCLI(): Command {
@@ -16,6 +17,8 @@ export function createCLI(): Command {
             'Bridge WhatsApp with Claude Code - interact with your files via WhatsApp messages'
         )
         .version(displayVersion, '-V, --version', 'Output the version number')
+        .enablePositionalOptions()
+        .passThroughOptions()
         .addHelpText('after', `\nBuild: ${getBuildInfoString()}`)
         .addHelpText(
             'after',
@@ -26,8 +29,19 @@ Examples:
   $ whatsapp-claude-agent -w "+1234567890" -m plan --verbose
   $ whatsapp-claude-agent -c ~/.config/whatsapp-claude-agent/config.json
   $ whatsapp-claude-agent -w "+1234567890" --resume <session-id>
-  $ whatsapp-claude-agent -w "+1234567890" --resume <session-id> --fork`
+  $ whatsapp-claude-agent -w "+1234567890" --resume <session-id> --fork
+
+Config Management (without running agent):
+  $ whatsapp-claude-agent config init "+1234567890"
+  $ whatsapp-claude-agent config show
+  $ whatsapp-claude-agent config set model opus
+  $ whatsapp-claude-agent config get whitelist`
         )
+
+    // Add config subcommand
+    program.addCommand(createConfigCommand())
+
+    program
         .option(
             '-d, --directory <path>',
             'Working directory for Claude (default: current directory)'
@@ -72,8 +86,29 @@ Examples:
             '--agent-name <name>',
             'Agent identity name used to prefix messages (default: auto-generated from hostname + directory + superhero)'
         )
+        // Allow running without subcommand (main agent mode)
+        .action(() => {
+            // No-op: parsing continues, main() in index.ts handles the rest
+        })
 
     return program
+}
+
+/**
+ * Check if args contain a subcommand that doesn't require the agent to run
+ */
+export function isConfigSubcommand(args: string[]): boolean {
+    return args.includes('config')
+}
+
+/**
+ * Run the config subcommand and exit
+ */
+export function runConfigSubcommand(args: string[]): never {
+    const program = createCLI()
+    program.parse(args)
+    // If we get here, the subcommand handled everything
+    process.exit(0)
 }
 
 export function parseArgs(args: string[]): Config {

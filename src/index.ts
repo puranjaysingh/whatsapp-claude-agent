@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { parseArgs } from './cli/commands.ts'
+import { parseArgs, isConfigSubcommand, runConfigSubcommand } from './cli/commands.ts'
 import { createLogger } from './utils/logger.ts'
 import { WhatsAppClient } from './whatsapp/client.ts'
 import { SDKBackend } from './claude/sdk-backend.ts'
@@ -8,6 +8,11 @@ import { phoneToJid } from './utils/phone.ts'
 import type { Config, AgentEvent, IncomingMessage, PermissionRequest } from './types.ts'
 
 async function main() {
+    // Handle config subcommand without running agent
+    if (isConfigSubcommand(process.argv)) {
+        runConfigSubcommand(process.argv)
+    }
+
     // Parse command line arguments
     let config: Config
     try {

@@ -4,6 +4,38 @@
 
 **`whitelist`** — MANDATORY. App exits if not provided via CLI (`-w`) or config file. Must contain at least one phone number.
 
+## CLI Config Management
+
+Manage config without running agent via `config` subcommand:
+
+```bash
+# Initialize new config
+whatsapp-claude-agent config init "+1234567890"
+whatsapp-claude-agent config init "+111,+222"  # multiple numbers
+
+# View config
+whatsapp-claude-agent config show              # human-readable
+whatsapp-claude-agent config show --json       # JSON output
+whatsapp-claude-agent config export            # JSON to stdout
+
+# Get/set individual values
+whatsapp-claude-agent config get model
+whatsapp-claude-agent config set model opus
+whatsapp-claude-agent config set whitelist "+111,+222"
+whatsapp-claude-agent config set verbose true
+whatsapp-claude-agent config unset maxTurns
+
+# Import config
+whatsapp-claude-agent config import '{"model":"opus"}'
+whatsapp-claude-agent config import config.backup.json --merge
+
+# Specify config location
+whatsapp-claude-agent config -d /path/to/project show
+whatsapp-claude-agent config -c /custom/path.json set model haiku
+```
+
+Valid keys for set/get: whitelist, directory, mode, sessionPath, model, maxTurns, processMissed, missedThresholdMins, verbose, agentName, systemPrompt, systemPromptAppend, settingSources
+
 ## Sources (Priority Order)
 
 1. **CLI arguments** (highest) — override everything
