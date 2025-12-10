@@ -67,6 +67,8 @@ Options:
   --system-prompt <prompt>       Custom system prompt (replaces default)
   --system-prompt-append <text>  Text to append to default system prompt
   --load-claude-md <sources>     Load CLAUDE.md files (user,project,local)
+  --resume <sessionId>           Resume a previous Claude session
+  --fork                         Fork the session when resuming (creates new branch)
   -v, --verbose                  Enable verbose logging
   -c, --config <path>            Path to config file
   -h, --help                     Show help
@@ -75,33 +77,41 @@ Options:
 
 ### Examples
 
+The examples below use `./whatsapp-claude-agent` as a placeholder. Replace with your actual binary name (e.g., `./whatsapp-claude-agent-linux-x64`, `./whatsapp-claude-agent-darwin-arm64`, etc.).
+
 ```bash
 # Basic usage with your phone number
-bun run dev -- -w +1234567890
+./whatsapp-claude-agent -w "+1234567890"
 
 # Point to a specific folder
-bun run dev -- -w +1234567890 -d ~/Documents/notes
+./whatsapp-claude-agent -w "+1234567890" -d ~/Documents/notes
 
 # Enable verbose logging
-bun run dev -- -w +1234567890 -v
+./whatsapp-claude-agent -w "+1234567890" -v
 
 # Start in read-only mode
-bun run dev -- -w +1234567890 -m plan
+./whatsapp-claude-agent -w "+1234567890" -m plan
 
 # Auto-accept file edits
-bun run dev -- -w +1234567890 -m acceptEdits
+./whatsapp-claude-agent -w "+1234567890" -m acceptEdits
 
 # Full access mode (dangerous!)
-bun run dev -- -w +1234567890 -m bypassPermissions
+./whatsapp-claude-agent -w "+1234567890" -m bypassPermissions
 
 # Custom system prompt
-bun run dev -- -w +1234567890 --system-prompt "You are a helpful coding assistant."
+./whatsapp-claude-agent -w "+1234567890" --system-prompt "You are a helpful coding assistant."
 
 # Append instructions to default prompt
-bun run dev -- -w +1234567890 --system-prompt-append "Always explain your reasoning."
+./whatsapp-claude-agent -w "+1234567890" --system-prompt-append "Always explain your reasoning."
 
 # Load CLAUDE.md files from user and project directories
-bun run dev -- -w +1234567890 --load-claude-md user,project
+./whatsapp-claude-agent -w "+1234567890" --load-claude-md user,project
+
+# Resume a previous session
+./whatsapp-claude-agent -w "+1234567890" --resume <session-id>
+
+# Resume and fork (create a new branch from the session)
+./whatsapp-claude-agent -w "+1234567890" --resume <session-id> --fork
 ```
 
 ## WhatsApp Commands
@@ -110,11 +120,15 @@ Once connected, you can send these commands via WhatsApp:
 
 ### Session Commands
 
-| Command   | Description                |
-| --------- | -------------------------- |
-| `/help`   | Show available commands    |
-| `/status` | Show agent status          |
-| `/clear`  | Clear conversation history |
+| Command          | Description                            |
+| ---------------- | -------------------------------------- |
+| `/help`          | Show available commands                |
+| `/status`        | Show agent status                      |
+| `/clear`         | Clear conversation history             |
+| `/session`       | Show current session ID                |
+| `/session <id>`  | Set session ID to resume               |
+| `/session clear` | Start a new session                    |
+| `/fork`          | Fork current session (create a branch) |
 
 ### Permission Mode Commands
 
@@ -149,6 +163,64 @@ Customize how Claude behaves by modifying the system prompt. See the [Claude Age
 
 Valid CLAUDE.md sources: `user` (global ~/.claude/CLAUDE.md), `project` (project CLAUDE.md), `local` (local settings)
 
+## Session Management
+
+The agent supports session persistence, allowing you to resume or fork previous conversations with Claude. Sessions maintain full conversation context, so Claude remembers everything from previous interactions.
+
+### How Sessions Work
+
+1. **Automatic Session Creation**: When you start a conversation, a session ID is automatically created and captured
+2. **View Session ID**: Use `/session` or `/status` to see your current session ID
+3. **Resume Later**: Use the session ID with `--resume` to continue where you left off
+4. **Fork Sessions**: Create branches to explore different directions without losing the original conversation
+
+### Resuming Sessions
+
+Resume a previous session via CLI:
+
+```bash
+./whatsapp-claude-agent -w "+1234567890" --resume abc123-session-id
+```
+
+Or via WhatsApp command:
+
+```
+/session abc123-session-id
+```
+
+Then send your next message - Claude will have full context from the previous session.
+
+### Forking Sessions
+
+Forking creates a new conversation branch from an existing session. The original session remains unchanged, allowing you to:
+
+- Explore different approaches from the same starting point
+- Test changes without affecting the original conversation
+- Create multiple parallel conversation paths
+
+**Fork via CLI** (at startup):
+
+```bash
+./whatsapp-claude-agent -w "+1234567890" --resume abc123-session-id --fork
+```
+
+**Fork via WhatsApp** (during conversation):
+
+```
+/fork
+```
+
+After `/fork`, your next message creates a new session branch. The original session is preserved.
+
+### Session Commands Summary
+
+| Command          | Description                                  |
+| ---------------- | -------------------------------------------- |
+| `/session`       | Show current session ID                      |
+| `/session <id>`  | Set session ID to resume on next message     |
+| `/session clear` | Clear session and start fresh                |
+| `/fork`          | Fork current session (next message branches) |
+
 ## Permission Modes
 
 These align with the [Claude Agent SDK permission modes](https://docs.anthropic.com/en/docs/claude-code/sdk):
@@ -173,11 +245,17 @@ You can create a config file at `~/.whatsapp-claude-agent/config.json`:
     "verbose": false,
     "systemPrompt": "You are a helpful coding assistant.",
     "systemPromptAppend": "Always explain your reasoning.",
-    "settingSources": ["user", "project"]
+    "settingSources": ["user", "project"],
+    "resumeSessionId": "abc123-session-id",
+    "forkSession": false
 }
 ```
 
-Note: Use either `systemPrompt` (replaces default) OR `systemPromptAppend` (adds to default), not both.
+Notes:
+
+- Use either `systemPrompt` (replaces default) OR `systemPromptAppend` (adds to default), not both
+- `resumeSessionId` can be set to automatically resume a specific session on startup
+- `forkSession` when `true` will fork the resumed session instead of continuing it
 
 ## Security Considerations
 

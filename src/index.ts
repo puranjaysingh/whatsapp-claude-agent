@@ -24,9 +24,32 @@ async function main() {
     logger.info(`Working directory: ${config.directory}`)
     logger.info(`Mode: ${config.mode}`)
     logger.info(`Whitelisted numbers: ${config.whitelist.join(', ')}`)
+    if (config.resumeSessionId) {
+        logger.info(
+            `Resuming session: ${config.resumeSessionId}${config.forkSession ? ' (forking)' : ''}`
+        )
+    }
 
     // Create Claude backend
     const backend = new SDKBackend(config, logger)
+
+    // Set up session callback to log session info with usage instructions
+    const executableName = process.argv[1]
+        ? process.argv[1].split('/').pop()
+        : 'whatsapp-claude-agent'
+    backend.setSessionCallback((sessionId: string) => {
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+        logger.info(`Session ID: ${sessionId}`)
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+        logger.info('To resume this session later:')
+        logger.info(`  ${executableName} -w "${config.whitelist[0]}" --resume ${sessionId}`)
+        logger.info('')
+        logger.info('To fork this session (create a new branch):')
+        logger.info(`  ${executableName} -w "${config.whitelist[0]}" --resume ${sessionId} --fork`)
+        logger.info('')
+        logger.info('Or use WhatsApp commands: /session, /fork')
+        logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    })
 
     // Create WhatsApp client
     const whatsapp = new WhatsAppClient(config, logger)

@@ -43,10 +43,13 @@ function findClaudeCodePath(): string | undefined {
 
 export class SDKBackend extends ClaudeBackend {
     private claudeCodePath: string | undefined
+    private currentSessionId: string | undefined
+    private forkNextQuery: boolean
 
     constructor(config: Config, logger: Logger) {
         super(config, logger)
         this.claudeCodePath = findClaudeCodePath()
+        this.forkNextQuery = config.forkSession
         if (this.claudeCodePath) {
             this.logger.info(`Found Claude Code at: ${this.claudeCodePath}`)
         } else {
@@ -54,6 +57,48 @@ export class SDKBackend extends ClaudeBackend {
                 'Claude Code executable not found. Install it globally with: npm install -g @anthropic-ai/claude-code'
             )
         }
+
+        // Initialize from config if resuming a session
+        if (config.resumeSessionId) {
+            this.currentSessionId = config.resumeSessionId
+            this.logger.info(
+                `Will resume session: ${config.resumeSessionId}${config.forkSession ? ' (forking)' : ''}`
+            )
+        }
+    }
+
+    /**
+     * Get the current session ID
+     */
+    override getSessionId(): string | undefined {
+        return this.currentSessionId
+    }
+
+    /**
+     * Set the session ID (for resuming)
+     */
+    override setSessionId(sessionId: string | undefined): void {
+        this.currentSessionId = sessionId
+        if (sessionId) {
+            this.logger.info(`Session ID set to: ${sessionId}`)
+        } else {
+            this.logger.info('Session ID cleared')
+        }
+    }
+
+    /**
+     * Enable forking for the next query
+     */
+    override setForkSession(fork: boolean): void {
+        this.forkNextQuery = fork
+        this.logger.info(`Fork session set to: ${fork}`)
+    }
+
+    /**
+     * Get current fork session setting
+     */
+    override getForkSession(): boolean {
+        return this.forkNextQuery
     }
 
     /**
@@ -101,22 +146,38 @@ export class SDKBackend extends ClaudeBackend {
 
             this.logger.debug(`Prompt length: ${fullPrompt.length} chars`)
 
+            // Build options for the query
+            const queryOptions: Parameters<typeof claudeQuery>[0]['options'] = {
+                pathToClaudeCodeExecutable: this.claudeCodePath,
+                cwd: this.config.directory,
+                model: this.config.model,
+                maxTurns: this.config.maxTurns,
+                permissionMode: this.mode,
+                tools: { type: 'preset', preset: 'claude_code' },
+                systemPrompt: this.buildSystemPrompt(),
+                settingSources: this.config.settingSources,
+                canUseTool: async (toolName: string, input: unknown) => {
+                    this.logger.info(`>>> canUseTool callback invoked: ${toolName}`)
+                    return this.handleToolPermission(toolName, input)
+                }
+            }
+
+            // Add session resume/fork options if a session ID is set
+            if (this.currentSessionId) {
+                queryOptions.resume = this.currentSessionId
+                queryOptions.forkSession = this.forkNextQuery
+                this.logger.info(
+                    `Resuming session: ${this.currentSessionId}${this.forkNextQuery ? ' (forking)' : ''}`
+                )
+                // Reset fork flag after use (forking is a one-time operation)
+                if (this.forkNextQuery) {
+                    this.forkNextQuery = false
+                }
+            }
+
             const result = claudeQuery({
                 prompt: fullPrompt,
-                options: {
-                    pathToClaudeCodeExecutable: this.claudeCodePath,
-                    cwd: this.config.directory,
-                    model: this.config.model,
-                    maxTurns: this.config.maxTurns,
-                    permissionMode: this.mode,
-                    tools: { type: 'preset', preset: 'claude_code' },
-                    systemPrompt: this.buildSystemPrompt(),
-                    settingSources: this.config.settingSources,
-                    canUseTool: async (toolName: string, input: unknown) => {
-                        this.logger.info(`>>> canUseTool callback invoked: ${toolName}`)
-                        return this.handleToolPermission(toolName, input)
-                    }
-                }
+                options: queryOptions
             })
 
             this.logger.info('Waiting for Claude response...')
@@ -157,6 +218,21 @@ export class SDKBackend extends ClaudeBackend {
                     )
                 } else if (message.type === 'system') {
                     this.logger.debug(`System message: ${JSON.stringify(message).slice(0, 200)}`)
+                    // Capture session ID from the init message
+                    const systemMsg = message as {
+                        type: 'system'
+                        subtype?: string
+                        session_id?: string
+                    }
+                    if (systemMsg.subtype === 'init' && systemMsg.session_id) {
+                        const isNewSession = this.currentSessionId !== systemMsg.session_id
+                        this.currentSessionId = systemMsg.session_id
+                        this.logger.info(`Session ID captured: ${this.currentSessionId}`)
+                        // Notify callback if this is a new session
+                        if (isNewSession && this.onSessionCreated) {
+                            this.onSessionCreated(this.currentSessionId)
+                        }
+                    }
                 }
             }
 

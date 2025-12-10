@@ -145,6 +145,14 @@ export class ConversationManager extends EventEmitter {
                 await this.handleClaudeMdCommand(parsed.args, sendResponse)
                 break
 
+            case 'session':
+                await this.handleSessionCommand(parsed.args, sendResponse)
+                break
+
+            case 'fork':
+                await this.handleForkCommand(sendResponse)
+                break
+
             default:
                 await sendResponse(
                     `Unknown command: /${parsed.command}\n\nType /help for available commands.`
@@ -207,6 +215,59 @@ export class ConversationManager extends EventEmitter {
         this.backend.setSystemPromptAppend(args)
         await sendResponse(
             `✓ Text will be appended to default system prompt (${args.length} chars).`
+        )
+    }
+
+    private async handleSessionCommand(
+        args: string,
+        sendResponse: (text: string) => Promise<void>
+    ): Promise<void> {
+        const currentSessionId = this.backend.getSessionId()
+
+        if (!args) {
+            // Show current session info
+            if (currentSessionId) {
+                await sendResponse(
+                    `*Current Session:*\n\n\`${currentSessionId}\`\n\nUse this ID with \`--resume\` to continue this conversation later.`
+                )
+            } else {
+                await sendResponse(
+                    'No active session yet. Send a message to Claude to start a session.'
+                )
+            }
+            return
+        }
+
+        if (args.toLowerCase() === 'clear' || args.toLowerCase() === 'new') {
+            this.backend.setSessionId(undefined)
+            this.history.clear()
+            await sendResponse(
+                '✓ Session cleared. A new session will be started on the next message.'
+            )
+            return
+        }
+
+        // Set a session ID for resumption
+        this.backend.setSessionId(args)
+        await sendResponse(
+            `✓ Session set to: \`${args}\`\n\nNext message will resume this session.`
+        )
+    }
+
+    private async handleForkCommand(sendResponse: (text: string) => Promise<void>): Promise<void> {
+        const currentSessionId = this.backend.getSessionId()
+
+        if (!currentSessionId) {
+            await sendResponse(
+                '❌ No active session to fork. Start a conversation first, then use /fork to branch it.'
+            )
+            return
+        }
+
+        // Enable forking for the next query
+        this.backend.setForkSession(true)
+        await sendResponse(
+            `✓ Fork enabled for session \`${currentSessionId}\`.\n\nYour next message will create a new branch from this session. The original session remains unchanged.`
         )
     }
 
@@ -310,6 +371,10 @@ export class ConversationManager extends EventEmitter {
 *Session:*
 /clear - Clear conversation history
 /status - Show agent status
+/session - Show current session ID
+/session <id> - Set session ID to resume
+/session clear - Start a new session
+/fork - Fork current session (branch off)
 /help - Show this help message
 
 *Permission Modes:*
@@ -332,12 +397,17 @@ export class ConversationManager extends EventEmitter {
 /claudemd user,project - Load user & project CLAUDE.md
 /claudemd clear - Disable CLAUDE.md loading
 
-*Valid CLAUDE.md sources:* user, project, local`
+*Valid CLAUDE.md sources:* user, project, local
+
+*CLI Session Options:*
+\`--resume <id>\` - Resume a previous session
+\`--fork\` - Fork the session when resuming`
     }
 
     private getStatusMessage(): string {
         const promptConfig = this.backend.getSystemPromptConfig()
         const sources = this.backend.getSettingSources()
+        const sessionId = this.backend.getSessionId()
 
         let promptStatus = 'default'
         if (promptConfig.systemPrompt) {
@@ -347,12 +417,14 @@ export class ConversationManager extends EventEmitter {
         }
 
         const claudeMdStatus = sources?.length ? sources.join(', ') : 'disabled'
+        const sessionStatus = sessionId ? `\`${sessionId}\`` : 'none (new session)'
 
         return `*Agent Status:*
 
 📁 Working directory: \`${this.config.directory}\`
 🔐 Mode: ${this.config.mode}
 🤖 Model: ${this.config.model}
+🔗 Session: ${sessionStatus}
 💬 Conversation length: ${this.history.length} messages
 ⏳ Pending permissions: ${this.permissions.pendingCount}
 📝 System prompt: ${promptStatus}

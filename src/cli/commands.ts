@@ -24,7 +24,9 @@ Examples:
   $ whatsapp-claude-agent -w "+1234567890"
   $ whatsapp-claude-agent -w "+1234567890,+0987654321" -d ./my-project
   $ whatsapp-claude-agent -w "+1234567890" -m plan --verbose
-  $ whatsapp-claude-agent -c ~/.config/whatsapp-claude-agent/config.json`
+  $ whatsapp-claude-agent -c ~/.config/whatsapp-claude-agent/config.json
+  $ whatsapp-claude-agent -w "+1234567890" --resume <session-id>
+  $ whatsapp-claude-agent -w "+1234567890" --resume <session-id> --fork`
         )
         .option(
             '-d, --directory <path>',
@@ -59,6 +61,12 @@ Examples:
         .option(
             '--load-claude-md <sources>',
             'Comma-separated list of CLAUDE.md sources to load: "user", "project", "local" (e.g., "user,project")'
+        )
+        .option('--resume <sessionId>', 'Resume a previous Claude session by its session ID')
+        .option(
+            '--fork',
+            'When resuming, fork the session instead of continuing it (creates a new session ID)',
+            false
         )
 
     return program

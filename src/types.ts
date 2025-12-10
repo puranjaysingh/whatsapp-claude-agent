@@ -34,7 +34,9 @@ export const ConfigSchema = z.object({
     verbose: z.boolean().default(false),
     systemPrompt: z.string().optional(),
     systemPromptAppend: z.string().optional(),
-    settingSources: z.array(SettingSourceSchema).optional()
+    settingSources: z.array(SettingSourceSchema).optional(),
+    resumeSessionId: z.string().optional(),
+    forkSession: z.boolean().default(false)
 })
 
 export type Config = z.infer<typeof ConfigSchema>

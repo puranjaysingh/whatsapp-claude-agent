@@ -11,11 +11,16 @@ export interface PermissionCallback {
     (toolName: string, description: string, input: unknown): Promise<boolean>
 }
 
+export interface SessionCallback {
+    (sessionId: string): void
+}
+
 export abstract class ClaudeBackend {
     protected config: Config
     protected logger: Logger
     protected mode: PermissionMode
     protected onPermissionRequest?: PermissionCallback
+    protected onSessionCreated?: SessionCallback
 
     constructor(config: Config, logger: Logger) {
         this.config = config
@@ -30,6 +35,10 @@ export abstract class ClaudeBackend {
 
     setPermissionCallback(callback: PermissionCallback): void {
         this.onPermissionRequest = callback
+    }
+
+    setSessionCallback(callback: SessionCallback): void {
+        this.onSessionCreated = callback
     }
 
     /**
@@ -81,6 +90,34 @@ export abstract class ClaudeBackend {
      */
     getSettingSources(): SettingSource[] | undefined {
         return this.config.settingSources
+    }
+
+    /**
+     * Get current session ID (if any)
+     */
+    getSessionId(): string | undefined {
+        return undefined // Override in subclass
+    }
+
+    /**
+     * Set session ID for resumption
+     */
+    setSessionId(_sessionId: string | undefined): void {
+        // Override in subclass
+    }
+
+    /**
+     * Enable forking for the next query (creates a new session branch)
+     */
+    setForkSession(_fork: boolean): void {
+        // Override in subclass
+    }
+
+    /**
+     * Get current fork session setting
+     */
+    getForkSession(): boolean {
+        return false // Override in subclass
     }
 
     abstract query(prompt: string, conversationHistory?: string[]): Promise<ClaudeResponse>

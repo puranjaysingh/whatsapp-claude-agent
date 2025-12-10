@@ -47,6 +47,8 @@ export interface CLIOptions {
     systemPrompt?: string
     systemPromptAppend?: string
     loadClaudeMd?: string
+    resume?: string
+    fork?: boolean
 }
 
 export function parseConfig(cliOptions: CLIOptions): Config {
@@ -76,7 +78,9 @@ export function parseConfig(cliOptions: CLIOptions): Config {
         systemPromptAppend: cliOptions.systemPromptAppend || fileConfig.systemPromptAppend,
         settingSources: cliOptions.loadClaudeMd
             ? (cliOptions.loadClaudeMd.split(',').map((s) => s.trim()) as SettingSource[])
-            : fileConfig.settingSources
+            : fileConfig.settingSources,
+        resumeSessionId: cliOptions.resume || fileConfig.resumeSessionId,
+        forkSession: cliOptions.fork ?? fileConfig.forkSession
     }
 
     // Filter out undefined values
