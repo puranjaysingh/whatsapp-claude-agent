@@ -184,10 +184,4 @@ bun run dev -- -w "+1234567890"
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run linting and type checking (`bun run lint && bun run tsc`)
-5. Commit using conventional commits (`bun run commit`)
-6. Push to your branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to contribute to this project.
