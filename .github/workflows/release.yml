@@ -98,14 +98,59 @@ jobs:
               run: ls -lah dist/
 
             - name: Configure Git
-              if: github.event_name == 'workflow_dispatch'
               run: |
                   git config user.name "github-actions[bot]"
                   git config user.email "github-actions[bot]@users.noreply.github.com"
 
+            - name: Setup Node.js for conventional-changelog
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  npm install -g conventional-changelog-cli
+
+                  # Get the previous tag
+                  PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+                  if [ -z "$PREVIOUS_TAG" ]; then
+                    # First release - generate full changelog
+                    conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0
+                  else
+                    # Append new version to existing changelog
+                    conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 1
+                  fi
+
+                  # Generate release notes for this version only
+                  conventional-changelog -p conventionalcommits -r 1 -o RELEASE_NOTES.md
+
+                  # Show generated changelog
+                  echo "=== CHANGELOG.md ==="
+                  cat CHANGELOG.md
+                  echo ""
+                  echo "=== RELEASE_NOTES.md ==="
+                  cat RELEASE_NOTES.md
+
+            - name: Commit and push changelog
+              run: |
+                  git add CHANGELOG.md
+                  if git diff --staged --quiet; then
+                    echo "No changelog changes to commit"
+                  else
+                    git commit -m "docs: update CHANGELOG.md for ${{ steps.version.outputs.tag }}"
+                    git push origin HEAD:main
+                  fi
+
             - name: Create and push tag
               if: github.event_name == 'workflow_dispatch'
               run: |
+                  # Delete tag if it exists (in case we need to re-tag after changelog commit)
+                  git tag -d "${{ steps.version.outputs.tag }}" 2>/dev/null || true
+                  git push origin :refs/tags/${{ steps.version.outputs.tag }} 2>/dev/null || true
+
+                  # Create new tag on latest commit (includes changelog)
                   git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
                   git push origin "${{ steps.version.outputs.tag }}"
 
@@ -114,7 +159,7 @@ jobs:
               with:
                   tag_name: ${{ steps.version.outputs.tag }}
                   name: Release ${{ steps.version.outputs.tag }}
-                  generate_release_notes: true
+                  body_path: RELEASE_NOTES.md
                   files: |
                       dist/whatsapp-claude-agent-linux-x64
                       dist/whatsapp-claude-agent-darwin-arm64
