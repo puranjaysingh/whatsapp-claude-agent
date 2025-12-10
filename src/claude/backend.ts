@@ -93,6 +93,21 @@ export abstract class ClaudeBackend {
     }
 
     /**
+     * Set the working directory for Claude
+     */
+    setDirectory(directory: string): void {
+        this.config.directory = directory
+        this.logger.info(`Working directory changed to: ${directory}`)
+    }
+
+    /**
+     * Get current working directory
+     */
+    getDirectory(): string {
+        return this.config.directory
+    }
+
+    /**
      * Get current session ID (if any)
      */
     getSessionId(): string | undefined {

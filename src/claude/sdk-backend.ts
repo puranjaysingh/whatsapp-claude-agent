@@ -250,6 +250,23 @@ export class SDKBackend extends ClaudeBackend {
             if (error instanceof Error && error.stack) {
                 this.logger.debug(`Stack trace: ${error.stack}`)
             }
+
+            // Check if this is a session resume failure (process exited with code 1)
+            // This often happens when trying to resume a session with a different cwd
+            if (errorMessage.includes('process exited with code') && this.currentSessionId) {
+                this.logger.warn(
+                    'Session resume failed. This may be because the session was created in a different directory. ' +
+                        'Clearing session ID - next message will start a new session.'
+                )
+                this.currentSessionId = undefined
+                return {
+                    text: '',
+                    error:
+                        'Failed to resume session (sessions are tied to the directory they were created in). ' +
+                        'Please send your message again to start a new session.'
+                }
+            }
+
             return {
                 text: '',
                 error: errorMessage

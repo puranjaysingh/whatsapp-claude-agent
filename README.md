@@ -118,17 +118,19 @@ The examples below use `./whatsapp-claude-agent` as a placeholder. Replace with 
 
 Once connected, you can send these commands via WhatsApp:
 
-### Session Commands
+### Session & Directory Commands
 
-| Command          | Description                            |
-| ---------------- | -------------------------------------- |
-| `/help`          | Show available commands                |
-| `/status`        | Show agent status                      |
-| `/clear`         | Clear conversation history             |
-| `/session`       | Show current session ID                |
-| `/session <id>`  | Set session ID to resume               |
-| `/session clear` | Start a new session                    |
-| `/fork`          | Fork current session (create a branch) |
+| Command          | Description                               |
+| ---------------- | ----------------------------------------- |
+| `/help`          | Show available commands                   |
+| `/status`        | Show agent status                         |
+| `/clear`         | Clear conversation history                |
+| `/session`       | Show current session ID                   |
+| `/session <id>`  | Set session ID to resume                  |
+| `/session clear` | Start a new session                       |
+| `/fork`          | Fork current session (create a branch)    |
+| `/cd`            | Show current working directory            |
+| `/cd <path>`     | Change working directory (clears session) |
 
 ### Permission Mode Commands
 

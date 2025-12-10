@@ -1,4 +1,7 @@
 import { EventEmitter } from 'events'
+import { existsSync, statSync } from 'fs'
+import { resolve } from 'path'
+import { homedir } from 'os'
 import { ConversationHistory } from './history.ts'
 import { MessageQueue } from './queue.ts'
 import type { ClaudeBackend } from '../claude/backend.ts'
@@ -153,6 +156,12 @@ export class ConversationManager extends EventEmitter {
                 await this.handleForkCommand(sendResponse)
                 break
 
+            case 'cd':
+            case 'dir':
+            case 'directory':
+                await this.handleDirectoryCommand(parsed.args, sendResponse)
+                break
+
             default:
                 await sendResponse(
                     `Unknown command: /${parsed.command}\n\nType /help for available commands.`
@@ -271,6 +280,65 @@ export class ConversationManager extends EventEmitter {
         )
     }
 
+    private async handleDirectoryCommand(
+        args: string,
+        sendResponse: (text: string) => Promise<void>
+    ): Promise<void> {
+        if (!args) {
+            // Show current working directory
+            const currentDir = this.backend.getDirectory()
+            await sendResponse(`📁 Working directory: \`${currentDir}\``)
+            return
+        }
+
+        // Expand ~ to home directory
+        let targetPath = args
+        if (targetPath.startsWith('~')) {
+            targetPath = resolve(homedir(), targetPath.slice(2))
+        } else {
+            targetPath = resolve(targetPath)
+        }
+
+        // Validate the path exists and is a directory
+        if (!existsSync(targetPath)) {
+            await sendResponse(`❌ Directory not found: \`${targetPath}\``)
+            return
+        }
+
+        try {
+            const stats = statSync(targetPath)
+            if (!stats.isDirectory()) {
+                await sendResponse(`❌ Path is not a directory: \`${targetPath}\``)
+                return
+            }
+        } catch {
+            await sendResponse(`❌ Cannot access path: \`${targetPath}\``)
+            return
+        }
+
+        // Check if there's an active session - changing directory requires a new session
+        const currentSessionId = this.backend.getSessionId()
+        if (currentSessionId) {
+            // Clear the session since it's tied to the old directory
+            this.backend.setSessionId(undefined)
+            this.history.clear()
+            this.logger.info(
+                `Session cleared due to directory change (sessions are tied to their original directory)`
+            )
+        }
+
+        // Change the directory
+        this.backend.setDirectory(targetPath)
+        this.config.directory = targetPath
+
+        let response = `✓ Working directory changed to: \`${targetPath}\``
+        if (currentSessionId) {
+            response +=
+                '\n\n⚠️ Previous session was cleared (sessions are tied to their original directory). A new session will start with your next message.'
+        }
+        await sendResponse(response)
+    }
+
     private async handleClaudeMdCommand(
         args: string,
         sendResponse: (text: string) => Promise<void>
@@ -368,13 +436,15 @@ export class ConversationManager extends EventEmitter {
     private getHelpMessage(): string {
         return `*Available Commands:*
 
-*Session:*
+*Session & Directory:*
 /clear - Clear conversation history
 /status - Show agent status
 /session - Show current session ID
 /session <id> - Set session ID to resume
 /session clear - Start a new session
 /fork - Fork current session (branch off)
+/cd - Show current working directory
+/cd <path> - Change working directory
 /help - Show this help message
 
 *Permission Modes:*

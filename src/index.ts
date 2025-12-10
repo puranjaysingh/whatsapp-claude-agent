@@ -28,6 +28,11 @@ async function main() {
         logger.info(
             `Resuming session: ${config.resumeSessionId}${config.forkSession ? ' (forking)' : ''}`
         )
+        logger.warn(
+            '⚠️  Note: Sessions are tied to the directory they were created in. ' +
+                'If you specify a different directory with -d, the session will fail to resume ' +
+                'and a new session will be started instead.'
+        )
     }
 
     // Create Claude backend
