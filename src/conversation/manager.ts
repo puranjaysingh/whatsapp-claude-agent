@@ -9,7 +9,7 @@ import { PermissionManager } from '../claude/permissions.ts'
 import { getModelShorthand } from '../claude/utils.ts'
 import { isCommand, parseCommand } from '../whatsapp/messages.ts'
 import {
-    getDefaultConfigPath,
+    getLocalConfigPath,
     loadConfigFile,
     saveConfigFile,
     generateConfigTemplate
@@ -545,7 +545,7 @@ export class ConversationManager extends EventEmitter {
         sendResponse: (text: string) => Promise<void>
     ): Promise<void> {
         const subcommand = args.trim().toLowerCase()
-        const configPath = getDefaultConfigPath()
+        const configPath = getLocalConfigPath(this.config.directory)
 
         if (!subcommand || subcommand === 'show' || subcommand === 'list') {
             // Show current configuration
@@ -585,7 +585,7 @@ export class ConversationManager extends EventEmitter {
 
         if (subcommand === 'reload') {
             // Reload config from file (show what would be loaded, but don't actually reload since it requires restart)
-            const fileConfig = loadConfigFile()
+            const fileConfig = loadConfigFile(configPath)
             if (Object.keys(fileConfig).length === 0) {
                 await sendResponse(
                     `⚠️ No config file found at:\n\`${configPath}\`\n\nUse \`/config generate\` to create a template.`

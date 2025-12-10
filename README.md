@@ -203,7 +203,7 @@ Valid CLAUDE.md sources: `user` (global ~/.claude/CLAUDE.md), `project` (project
 
 ### Configuration File Commands
 
-Manage your configuration file directly from WhatsApp:
+Manage your configuration file directly from WhatsApp. Config files are saved to the current working directory (`config.json`).
 
 | Command            | Description                                        |
 | ------------------ | -------------------------------------------------- |
@@ -293,7 +293,12 @@ These align with the [Claude Agent SDK permission modes](https://docs.anthropic.
 
 ## Configuration File
 
-You can create a config file at `~/.whatsapp-claude-agent/config.json`:
+You can create a config file in two locations:
+
+1. **Working directory** (recommended): `./config.json` - used by `/config` WhatsApp commands
+2. **Home directory**: `~/.whatsapp-claude-agent/config.json` - loaded at startup if no `-c` option specified
+
+Example configuration:
 
 ```json
 {

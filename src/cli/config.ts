@@ -19,6 +19,13 @@ export function getDefaultConfigPath(): string {
 }
 
 /**
+ * Get the config path in the current working directory
+ */
+export function getLocalConfigPath(directory?: string): string {
+    return resolve(directory || process.cwd(), CONFIG_FILE_NAME)
+}
+
+/**
  * Properties that should be saved to config file (excludes runtime-only properties)
  */
 type SaveableConfigKey =
@@ -53,10 +60,11 @@ const SAVEABLE_KEYS: SaveableConfigKey[] = [
 ]
 
 /**
- * Save configuration to a file
+ * Save configuration to a file.
+ * By default saves to the working directory (config.directory/config.json).
  */
 export function saveConfigFile(config: Config, configPath?: string): string {
-    const path = configPath || getDefaultConfigPath()
+    const path = configPath || getLocalConfigPath(config.directory)
     const expandedPath = expandPath(path)
 
     // Ensure directory exists
