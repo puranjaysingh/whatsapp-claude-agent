@@ -49,8 +49,65 @@ jobs:
               run: |
                   mkdir -p dist
                   BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+                  RIPGREP_VENDOR="node_modules/@anthropic-ai/claude-agent-sdk/vendor/ripgrep"
+
+                  # Helper function to keep only the specified platform's ripgrep binary
+                  # Ripgrep uses format: x64-linux, arm64-darwin, x64-darwin, x64-win32
+                  cleanup_ripgrep() {
+                    local keep_platform="$1"
+                    mkdir -p /tmp/ripgrep-backup
+                    for dir in "$RIPGREP_VENDOR"/*/; do
+                      platform=$(basename "$dir")
+                      if [ "$platform" != "$keep_platform" ] && [ "$platform" != "COPYING" ]; then
+                        mv "$dir" "/tmp/ripgrep-backup/"
+                      fi
+                    done
+                  }
+
+                  restore_ripgrep() {
+                    if [ -d /tmp/ripgrep-backup ]; then
+                      mv /tmp/ripgrep-backup/*/ "$RIPGREP_VENDOR/" 2>/dev/null || true
+                      rm -rf /tmp/ripgrep-backup
+                    fi
+                  }
+
+                  # Helper function to keep only the specified platform's sharp binaries
+                  # Sharp uses format: sharp-linux-x64, sharp-darwin-arm64, sharp-win32-x64, etc.
+                  # Also has libvips variants: sharp-libvips-linux-x64, etc.
+                  cleanup_sharp() {
+                    local keep_pattern="$1"
+                    mkdir -p /tmp/sharp-backup
+                    for dir in node_modules/@img/sharp-*/; do
+                      [ -d "$dir" ] || continue
+                      dirname=$(basename "$dir")
+                      if [[ ! "$dirname" =~ $keep_pattern ]]; then
+                        mv "$dir" "/tmp/sharp-backup/"
+                      fi
+                    done
+                  }
+
+                  restore_sharp() {
+                    if [ -d /tmp/sharp-backup ]; then
+                      mv /tmp/sharp-backup/*/ node_modules/@img/ 2>/dev/null || true
+                      rm -rf /tmp/sharp-backup
+                    fi
+                  }
+
+                  # Combined cleanup and restore for a platform
+                  cleanup_platform() {
+                    local ripgrep_platform="$1"
+                    local sharp_pattern="$2"
+                    cleanup_ripgrep "$ripgrep_platform"
+                    cleanup_sharp "$sharp_pattern"
+                  }
+
+                  restore_platform() {
+                    restore_ripgrep
+                    restore_sharp
+                  }
 
                   # Linux x64
+                  cleanup_platform "x64-linux" "linux-x64|linuxmusl-x64"
                   bun build src/index.ts \
                     --compile \
                     --minify \
@@ -59,8 +116,10 @@ jobs:
                     --define "BUILD_COMMIT='\"${{ github.sha }}\"'" \
                     --target=bun-linux-x64 \
                     --outfile dist/whatsapp-claude-agent-linux-x64
+                  restore_platform
 
                   # macOS ARM64 (Apple Silicon)
+                  cleanup_platform "arm64-darwin" "darwin-arm64"
                   bun build src/index.ts \
                     --compile \
                     --minify \
@@ -69,8 +128,10 @@ jobs:
                     --define "BUILD_COMMIT='\"${{ github.sha }}\"'" \
                     --target=bun-darwin-arm64 \
                     --outfile dist/whatsapp-claude-agent-darwin-arm64
+                  restore_platform
 
                   # macOS x64 (Intel)
+                  cleanup_platform "x64-darwin" "darwin-x64"
                   bun build src/index.ts \
                     --compile \
                     --minify \
@@ -79,8 +140,10 @@ jobs:
                     --define "BUILD_COMMIT='\"${{ github.sha }}\"'" \
                     --target=bun-darwin-x64 \
                     --outfile dist/whatsapp-claude-agent-darwin-x64
+                  restore_platform
 
                   # Windows x64
+                  cleanup_platform "x64-win32" "win32-x64"
                   bun build src/index.ts \
                     --compile \
                     --minify \
@@ -89,6 +152,7 @@ jobs:
                     --define "BUILD_COMMIT='\"${{ github.sha }}\"'" \
                     --target=bun-windows-x64 \
                     --outfile dist/whatsapp-claude-agent-windows-x64.exe
+                  restore_platform
 
             - name: List artifacts
               run: ls -lah dist/
