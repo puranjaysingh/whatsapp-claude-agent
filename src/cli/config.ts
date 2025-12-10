@@ -4,8 +4,7 @@ import { resolve, dirname } from 'path'
 import { ConfigSchema, type Config, type SettingSource } from '../types.ts'
 import { resolveModelShorthand } from '../claude/utils.ts'
 import { generateAgentIdentity, normalizeAgentName } from '../utils/agent-name.ts'
-
-const CONFIG_FILE_NAME = '.whatsapp-claude-agent.json'
+import { CONFIG_FILE_NAME } from '../constants.ts'
 
 function expandPath(path: string): string {
     if (path.startsWith('~')) {
