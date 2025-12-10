@@ -60,7 +60,7 @@ Options:
   -m, --mode <mode>              Permission mode (see below)
   -w, --whitelist <numbers>      Comma-separated phone numbers (required)
   -s, --session <path>           WhatsApp session directory
-  --agent-name <name>            Agent name (default: auto-generated from directory + superhero)
+  --agent-name <name>            Agent name (default: "{Directory} {Superhero}", e.g., "My Project Spider Man")
   --model <model>                Claude model to use (supports shorthands)
   --max-turns <n>                Maximum conversation turns
   --process-missed               Process messages received while offline

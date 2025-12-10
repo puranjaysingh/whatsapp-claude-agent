@@ -70,7 +70,7 @@ Examples:
         )
         .option(
             '--agent-name <name>',
-            'Agent identity name used to prefix messages (default: {directory}-{random-superhero})'
+            'Agent identity name used to prefix messages (default: auto-generated from directory name + random superhero)'
         )
 
     return program
