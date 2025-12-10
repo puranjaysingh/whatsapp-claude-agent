@@ -127,8 +127,8 @@ install() {
         install_path="${install_path}.exe"
     fi
 
-    # Download binary
-    if ! curl -fsSL "$download_url" -o "$install_path"; then
+    # Download binary (show progress bar)
+    if ! curl -fL --progress-bar "$download_url" -o "$install_path"; then
         error "Failed to download binary. The release may not exist for your platform (${os}-${arch})."
     fi
 
