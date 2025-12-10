@@ -1,3 +1,8 @@
+## [1.1.1](https://github.com/dsebastien/whatsapp-claude-agent/compare/1.1.0...1.1.1) (2025-12-10)
+
+### Bug Fixes
+
+* **all:** fix changelog generation ([290c59a](https://github.com/dsebastien/whatsapp-claude-agent/commit/290c59a309f0481c1636261b9b5741fdd316e40d))
 ## [0.1.0](https://github.com/dsebastien/whatsapp-claude-agent/compare/1.0.1...0.1.0) (2025-12-10)
 
 ### Features
