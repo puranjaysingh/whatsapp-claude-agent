@@ -96,6 +96,10 @@ Config Management (without running agent):
             'In group mode, allow messages from all participants (bypasses whitelist). Messages from other agents are still ignored.',
             false
         )
+        .option(
+            '-u, --update',
+            'Check for updates and install the latest version. All other options are ignored when this flag is used.'
+        )
         // Allow running without subcommand (main agent mode)
         .action(() => {
             // No-op: parsing continues, main() in index.ts handles the rest

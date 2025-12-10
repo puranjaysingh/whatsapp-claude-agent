@@ -30,6 +30,16 @@ This will:
 
 After installation, you may need to add `~/.local/bin` to your PATH if it's not already there.
 
+### Updating
+
+To update to the latest version, use the built-in update command:
+
+```bash
+whatsapp-claude-agent --update
+```
+
+This will check for a new version, download it, and replace the current executable.
+
 ### Manual Download
 
 **Option 1: Download from GitHub Releases**
@@ -91,6 +101,7 @@ Options:
   --allow-all-group-participants Allow all group members (bypass whitelist)
   -v, --verbose                  Enable verbose logging
   -c, --config <path>            Path to config file
+  -u, --update                   Check for updates and install latest version
   -h, --help                     Show help
   --version                      Show version
 ```

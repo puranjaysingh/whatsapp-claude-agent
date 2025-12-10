@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { parseArgs, isConfigSubcommand, runConfigSubcommand } from './cli/commands.ts'
+import { isUpdateFlag, runUpdate } from './cli/update.ts'
 import { createLogger } from './utils/logger.ts'
 import { WhatsAppClient } from './whatsapp/client.ts'
 import { SDKBackend } from './claude/sdk-backend.ts'
@@ -8,6 +9,11 @@ import { phoneToJid } from './utils/phone.ts'
 import type { Config, AgentEvent, IncomingMessage, PermissionRequest } from './types.ts'
 
 async function main() {
+    // Handle --update flag first (ignores all other options)
+    if (isUpdateFlag(process.argv)) {
+        await runUpdate()
+    }
+
     // Handle config subcommand without running agent
     if (isConfigSubcommand(process.argv)) {
         runConfigSubcommand(process.argv)
