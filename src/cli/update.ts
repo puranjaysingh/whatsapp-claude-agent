@@ -84,19 +84,18 @@ async function downloadBinary(url: string, destPath: string): Promise<void> {
 }
 
 function getExecutablePath(): string {
-    // Get the path of the currently running executable
-    // process.execPath is the bun executable, not our script
-    // We need to find our actual binary path
+    // For compiled Bun binaries, Bun.main returns a virtual /$bunfs/... path
+    // In that case, process.execPath IS our compiled binary
+    if (Bun.main.startsWith('/$bunfs/')) {
+        return process.execPath
+    }
 
-    // If running as a compiled binary, Bun.main is the executable
-    const mainScript = Bun.main
-
-    // Check if we're running from a compiled binary or as a script
+    // Running as a script: check argv[1] first (the script path)
     if (process.argv[1] && existsSync(process.argv[1])) {
         return process.argv[1]
     }
 
-    return mainScript
+    return Bun.main
 }
 
 /**
@@ -128,23 +127,21 @@ export async function runUpdate(): Promise<never> {
     console.log('Checking for updates...')
 
     const currentVersion = buildInfo.version
-
-    if (currentVersion === '0.0.0-dev') {
-        console.error('Error: Cannot update development version.')
-        console.error('Please install a release version first.')
-        process.exit(1)
-    }
+    // Treat dev version as 0.0.0 (oldest possible) so it can always be updated
+    const comparableVersion = currentVersion === '0.0.0-dev' ? '0.0.0' : currentVersion
 
     try {
         // Fetch latest release info
         const release = await fetchLatestRelease()
         const latestVersion = release.tag_name
 
-        console.log(`Current version: ${currentVersion}`)
+        console.log(
+            `Current version: ${currentVersion}${currentVersion === '0.0.0-dev' ? ' (development)' : ''}`
+        )
         console.log(`Latest version:  ${latestVersion}`)
 
         // Compare versions
-        const comparison = compareVersions(currentVersion, latestVersion)
+        const comparison = compareVersions(comparableVersion, latestVersion)
 
         if (comparison >= 0) {
             console.log('\nYou are already running the latest version.')
