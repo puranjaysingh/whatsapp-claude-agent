@@ -95,7 +95,8 @@ async function main() {
 
     async function handlePermissionRequest(request: PermissionRequest) {
         // Send permission request to the user who initiated the conversation
-        const jid = currentSenderJid || phoneToJid(config.whitelist[0])
+        // whitelist[0] is guaranteed to exist by ConfigSchema validation (min 1 required)
+        const jid = currentSenderJid || phoneToJid(config.whitelist[0]!)
 
         logger.info(`Sending permission request to ${jid} for tool: ${request.toolName}`)
 

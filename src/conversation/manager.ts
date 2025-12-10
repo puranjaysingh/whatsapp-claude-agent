@@ -76,20 +76,39 @@ export class ConversationManager extends EventEmitter {
             case 'readonly':
             case 'plan':
                 this.setMode('plan')
-                await sendResponse('✓ Switched to *read-only* mode. Claude can only read files.')
+                await sendResponse('✓ Switched to *plan* mode. Claude can only read files.')
                 break
 
             case 'normal':
-                this.setMode('normal')
+            case 'default':
+                this.setMode('default')
                 await sendResponse(
-                    '✓ Switched to *normal* mode. Claude will ask permission for writes.'
+                    '✓ Switched to *default* mode. Claude will ask permission for writes.'
+                )
+                break
+
+            case 'acceptedits':
+            case 'accept-edits':
+                this.setMode('acceptEdits')
+                await sendResponse(
+                    '✓ Switched to *acceptEdits* mode. Claude can edit files without asking.'
                 )
                 break
 
             case 'yolo':
-                this.setMode('dangerously-skip-permissions')
+            case 'bypass':
+            case 'bypasspermissions':
+                this.setMode('bypassPermissions')
                 await sendResponse(
-                    '⚠️ Switched to *YOLO* mode. Claude has full access without confirmation!'
+                    '⚠️ Switched to *bypassPermissions* mode. Claude has full access without confirmation!'
+                )
+                break
+
+            case 'dontask':
+            case 'dont-ask':
+                this.setMode('dontAsk')
+                await sendResponse(
+                    '✓ Switched to *dontAsk* mode. Claude will not prompt, denies if not pre-approved.'
                 )
                 break
 
@@ -170,16 +189,20 @@ export class ConversationManager extends EventEmitter {
 
 /clear - Clear conversation history
 /mode - Show current permission mode
-/readonly - Switch to read-only mode
-/normal - Switch to normal mode (asks for permission)
-/yolo - Switch to full access mode (dangerous!)
+/plan - Switch to plan mode (read-only)
+/default - Switch to default mode (asks for permission)
+/acceptEdits - Auto-accept file edits
+/bypass - Bypass all permissions (dangerous!)
+/dontAsk - Deny if not pre-approved
 /status - Show agent status
 /help - Show this help message
 
 *Permission Modes:*
-• *readonly* - Claude can only read files
-• *normal* - Claude asks before writing
-• *yolo* - Claude has full access (be careful!)`
+• *plan* - Claude can only read files
+• *default* - Claude asks before writing
+• *acceptEdits* - Auto-accept file edits
+• *bypassPermissions* - Full access (dangerous!)
+• *dontAsk* - Deny if not pre-approved`
     }
 
     private getStatusMessage(): string {

@@ -5,7 +5,7 @@ Bridge WhatsApp with Claude Code - interact with your files via WhatsApp message
 ## Features
 
 - **Claude Agent SDK integration**: Direct integration with Claude Agent SDK
-- **Permission modes**: Read-only, normal (ask before writes), or full access
+- **Permission modes**: Full SDK permission modes (default, acceptEdits, bypassPermissions, plan, dontAsk)
 - **WhatsApp commands**: Switch modes, clear history, check status
 - **Message chunking**: Long responses are split into multiple messages
 - **Session persistence**: WhatsApp authentication is saved
@@ -32,7 +32,7 @@ whatsapp-claude-agent [options]
 
 Options:
   -d, --directory <path>     Working directory for Claude (default: cwd)
-  -m, --mode <mode>          "plan", "normal", or "dangerously-skip-permissions"
+  -m, --mode <mode>          Permission mode (see below)
   -w, --whitelist <numbers>  Comma-separated phone numbers (required)
   -s, --session <path>       WhatsApp session directory
   --model <model>            Claude model to use
@@ -61,29 +61,40 @@ bun run dev -- -w +1234567890 -v
 # Start in read-only mode
 bun run dev -- -w +1234567890 -m plan
 
+# Auto-accept file edits
+bun run dev -- -w +1234567890 -m acceptEdits
+
 # Full access mode (dangerous!)
-bun run dev -- -w +1234567890 -m dangerously-skip-permissions
+bun run dev -- -w +1234567890 -m bypassPermissions
 ```
 
 ## WhatsApp Commands
 
 Once connected, you can send these commands via WhatsApp:
 
-| Command     | Description                  |
-| ----------- | ---------------------------- |
-| `/help`     | Show available commands      |
-| `/status`   | Show agent status            |
-| `/clear`    | Clear conversation history   |
-| `/mode`     | Show current permission mode |
-| `/readonly` | Switch to read-only mode     |
-| `/normal`   | Switch to normal mode        |
-| `/yolo`     | Switch to full access mode   |
+| Command        | Description                              |
+| -------------- | ---------------------------------------- |
+| `/help`        | Show available commands                  |
+| `/status`      | Show agent status                        |
+| `/clear`       | Clear conversation history               |
+| `/mode`        | Show current permission mode             |
+| `/plan`        | Switch to plan mode (read-only)          |
+| `/default`     | Switch to default mode (asks permission) |
+| `/acceptEdits` | Switch to acceptEdits mode               |
+| `/bypass`      | Switch to bypassPermissions mode         |
+| `/dontAsk`     | Switch to dontAsk mode                   |
 
 ## Permission Modes
 
-- **plan**: Claude can only read files, no writes allowed
-- **normal**: Claude asks permission before writing/editing files
-- **dangerously-skip-permissions**: Claude has full access (use with caution!)
+These align with the [Claude Agent SDK permission modes](https://docs.anthropic.com/en/docs/claude-code/sdk):
+
+| Mode                | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `default`           | Standard behavior - prompts for dangerous operations         |
+| `acceptEdits`       | Auto-accept file edit operations (Write, Edit, NotebookEdit) |
+| `bypassPermissions` | Bypass all permission checks (dangerous!)                    |
+| `plan`              | Planning/read-only mode - no tool execution                  |
+| `dontAsk`           | Don't prompt for permissions - deny if not pre-approved      |
 
 ## Configuration File
 
@@ -92,7 +103,7 @@ You can create a config file at `~/.whatsapp-claude-agent/config.json`:
 ```json
 {
     "whitelist": ["+1234567890", "+0987654321"],
-    "mode": "normal",
+    "mode": "default",
     "model": "claude-sonnet-4-20250514",
     "verbose": false
 }
@@ -130,7 +141,7 @@ bun run build
 
 1. **Whitelist enforcement**: Only numbers in the whitelist can interact with the agent
 2. **Session security**: WhatsApp credentials are stored locally - keep them safe
-3. **Permission modes**: Default to "normal" mode for safety
+3. **Permission modes**: Default to `default` mode for safety - avoid `bypassPermissions` unless necessary
 4. **Rate limiting**: Be aware of WhatsApp's rate limits (~1000-2000 msgs/day)
 
 ## Requirements

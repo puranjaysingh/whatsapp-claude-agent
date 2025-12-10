@@ -1,11 +1,21 @@
 import { z } from 'zod'
+import type { PermissionMode as SDKPermissionMode } from '@anthropic-ai/claude-agent-sdk'
 
-export const PermissionMode = z.enum(['plan', 'normal', 'dangerously-skip-permissions'])
-export type PermissionMode = z.infer<typeof PermissionMode>
+// Re-export SDK's PermissionMode type for use throughout the app
+export type PermissionMode = SDKPermissionMode
+
+// Zod schema for runtime validation - aligns with SDK's PermissionMode
+export const PermissionModeSchema = z.enum([
+    'default',
+    'acceptEdits',
+    'bypassPermissions',
+    'plan',
+    'dontAsk'
+])
 
 export const ConfigSchema = z.object({
     directory: z.string().default(process.cwd()),
-    mode: PermissionMode.default('normal'),
+    mode: PermissionModeSchema.default('default'),
     whitelist: z.array(z.string()).min(1, 'At least one whitelisted number required'),
     sessionPath: z.string().default('~/.whatsapp-claude-agent/session'),
     model: z.string().default('claude-sonnet-4-20250514'),

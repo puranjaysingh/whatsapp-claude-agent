@@ -139,14 +139,22 @@ export function parseModeCommand(text: string): PermissionMode | null {
     const trimmed = text.trim().toLowerCase()
 
     switch (trimmed) {
-        case '/readonly':
         case '/plan':
+        case '/readonly':
             return 'plan'
-        case '/normal':
-            return 'normal'
-        case '/yolo':
-        case '/dangerously-skip-permissions':
-            return 'dangerously-skip-permissions'
+        case '/default':
+        case '/normal': // alias for backwards compatibility
+            return 'default'
+        case '/acceptedits':
+        case '/accept-edits':
+            return 'acceptEdits'
+        case '/bypasspermissions':
+        case '/bypass':
+        case '/yolo': // alias for backwards compatibility
+            return 'bypassPermissions'
+        case '/dontask':
+        case '/dont-ask':
+            return 'dontAsk'
         default:
             return null
     }

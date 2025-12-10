@@ -1,3 +1,15 @@
+## Development Workflow
+
+When starting work on this codebase, always run TypeScript watch in the background:
+
+```bash
+bun run tsc:watch
+```
+
+This ensures type errors are caught immediately as you make changes.
+
+## Bun Runtime
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`

@@ -32,8 +32,8 @@ Examples:
         )
         .option(
             '-m, --mode <mode>',
-            'Permission mode: "plan", "normal", or "dangerously-skip-permissions"',
-            'normal'
+            'Permission mode: "default", "acceptEdits", "bypassPermissions", "plan", or "dontAsk"',
+            'default'
         )
         .option(
             '-w, --whitelist <numbers>',

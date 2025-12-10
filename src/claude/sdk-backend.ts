@@ -85,7 +85,7 @@ export class SDKBackend extends ClaudeBackend {
                     cwd: this.config.directory,
                     model: this.config.model,
                     maxTurns: this.config.maxTurns,
-                    permissionMode: this.getSDKPermissionMode(),
+                    permissionMode: this.mode,
                     tools: { type: 'preset', preset: 'claude_code' },
                     canUseTool: async (toolName: string, input: unknown) => {
                         this.logger.info(`>>> canUseTool callback invoked: ${toolName}`)
@@ -156,18 +156,6 @@ export class SDKBackend extends ClaudeBackend {
         }
     }
 
-    private getSDKPermissionMode(): 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan' {
-        switch (this.mode) {
-            case 'plan':
-                return 'plan'
-            case 'dangerously-skip-permissions':
-                return 'bypassPermissions'
-            case 'normal':
-            default:
-                return 'default'
-        }
-    }
-
     private async handleToolPermission(
         toolName: string,
         input: unknown
@@ -176,9 +164,9 @@ export class SDKBackend extends ClaudeBackend {
 
         this.logger.debug(`handleToolPermission called: tool=${toolName}, mode=${this.mode}`)
 
-        // In bypass mode, allow everything
-        if (this.mode === 'dangerously-skip-permissions') {
-            this.logger.debug(`Allowing ${toolName} (bypass mode)`)
+        // In bypassPermissions mode, allow everything
+        if (this.mode === 'bypassPermissions') {
+            this.logger.debug(`Allowing ${toolName} (bypassPermissions mode)`)
             return { behavior: 'allow', updatedInput: inputRecord }
         }
 
@@ -188,14 +176,31 @@ export class SDKBackend extends ClaudeBackend {
             return { behavior: 'deny', message: 'Destructive tools not allowed in plan mode' }
         }
 
-        // In normal mode, ask for permission for destructive tools
-        if (this.mode === 'normal' && isDestructiveTool(toolName)) {
-            this.logger.info(`Destructive tool ${toolName} requires permission in normal mode`)
+        // In acceptEdits mode, auto-allow edit operations
+        if (
+            this.mode === 'acceptEdits' &&
+            (toolName === 'Edit' || toolName === 'Write' || toolName === 'NotebookEdit')
+        ) {
+            this.logger.debug(`Auto-allowing ${toolName} (acceptEdits mode)`)
+            return { behavior: 'allow', updatedInput: inputRecord }
+        }
+
+        // In dontAsk mode, deny if not pre-approved (destructive tools)
+        if (this.mode === 'dontAsk' && isDestructiveTool(toolName)) {
+            this.logger.debug(`Denied ${toolName} in dontAsk mode (not pre-approved)`)
+            return { behavior: 'deny', message: 'Tool not pre-approved in dontAsk mode' }
+        }
+
+        // In default mode, ask for permission for destructive tools
+        if (this.mode === 'default' && isDestructiveTool(toolName)) {
+            this.logger.info(`Destructive tool ${toolName} requires permission in default mode`)
             if (this.onPermissionRequest) {
                 const description = formatToolInput(toolName, input)
                 this.logger.info(`Sending permission request for ${toolName}...`)
                 const allowed = await this.onPermissionRequest(toolName, description, input)
-                this.logger.info(`Permission response for ${toolName}: ${allowed ? 'ALLOWED' : 'DENIED'}`)
+                this.logger.info(
+                    `Permission response for ${toolName}: ${allowed ? 'ALLOWED' : 'DENIED'}`
+                )
                 if (allowed) {
                     return { behavior: 'allow', updatedInput: inputRecord }
                 }
