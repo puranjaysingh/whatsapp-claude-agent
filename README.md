@@ -149,7 +149,70 @@ bun run build
 - [Bun](https://bun.sh/) runtime (v1.0+)
 - Node.js 20+ (for some dependencies)
 - Active WhatsApp account
-- Anthropic API key
+- Claude API key (see Authentication below)
+
+## Authentication
+
+The Claude Agent SDK requires authentication to access Claude models. The SDK spawns Claude Code as a subprocess, so **if Claude Code is already installed and authenticated on your machine, the SDK will automatically use those credentials** - no additional configuration needed.
+
+### Using Existing Claude Code Authentication (Easiest)
+
+If you've already installed and authenticated Claude Code:
+
+```bash
+# Install Claude Code globally (if not already installed)
+npm install -g @anthropic-ai/claude-code
+
+# Authenticate (one-time setup)
+claude
+
+# That's it! The Agent SDK will automatically use Claude Code's credentials
+```
+
+Claude Code stores credentials securely (in macOS Keychain on Mac, or equivalent on other platforms) and the SDK inherits this authentication when spawning Claude Code.
+
+### Manual API Key Configuration
+
+If you prefer to use an API key directly:
+
+1. Get an API key from the [Anthropic Console](https://console.anthropic.com/)
+2. Set the environment variable:
+
+```bash
+export ANTHROPIC_API_KEY=your-api-key
+```
+
+Or add it to your `.env` file (Bun loads it automatically):
+
+```bash
+# .env
+ANTHROPIC_API_KEY=your-api-key
+```
+
+### Third-Party Providers
+
+#### Amazon Bedrock
+
+```bash
+export CLAUDE_CODE_USE_BEDROCK=1
+# Configure AWS credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION)
+```
+
+#### Google Vertex AI
+
+```bash
+export CLAUDE_CODE_USE_VERTEX=1
+# Configure Google Cloud credentials (GOOGLE_APPLICATION_CREDENTIALS)
+```
+
+#### Microsoft Foundry
+
+```bash
+export CLAUDE_CODE_USE_FOUNDRY=1
+# Configure Azure credentials
+```
+
+For detailed third-party provider configuration, see the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/agent-sdk/overview#authentication)
 
 ## License
 
