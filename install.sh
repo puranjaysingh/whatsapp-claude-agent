@@ -127,17 +127,24 @@ install() {
         install_path="${install_path}.exe"
     fi
 
+    # Download to temp file first
+    local temp_path="${install_path}.tmp"
+
     # Download binary (show progress bar)
-    if ! curl -fL --progress-bar "$download_url" -o "$install_path"; then
+    if ! curl -fL --progress-bar "$download_url" -o "$temp_path"; then
+        rm -f "$temp_path"
         error "Failed to download binary. The release may not exist for your platform (${os}-${arch})."
     fi
 
     # Make executable (not needed on Windows)
     if [ "$os" != "windows" ]; then
-        chmod +x "$install_path"
+        chmod +x "$temp_path"
     fi
 
-    success "Installed to: ${install_path}"
+    # Replace existing binary (if any)
+    mv -f "$temp_path" "$install_path"
+
+    success "Installed ${version} to: ${install_path}"
 
     # Check if install directory is in PATH
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
