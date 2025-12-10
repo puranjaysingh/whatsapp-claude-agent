@@ -205,13 +205,34 @@ export class ConversationManager extends EventEmitter {
         }
 
         if (args.toLowerCase() === 'clear' || args.toLowerCase() === 'reset') {
+            // Clear session since system prompt affects conversation context
+            const currentSessionId = this.backend.getSessionId()
+            if (currentSessionId) {
+                this.backend.setSessionId(undefined)
+                this.history.clear()
+            }
             this.backend.setSystemPrompt(undefined)
-            await sendResponse('✓ System prompt reset to default.')
+            let response = '✓ System prompt reset to default.'
+            if (currentSessionId) {
+                response +=
+                    '\n\n⚠️ Session cleared. A new session will start with your next message.'
+            }
+            await sendResponse(response)
             return
         }
 
+        // Clear session since system prompt affects conversation context
+        const currentSessionId = this.backend.getSessionId()
+        if (currentSessionId) {
+            this.backend.setSessionId(undefined)
+            this.history.clear()
+        }
         this.backend.setSystemPrompt(args)
-        await sendResponse(`✓ System prompt set (${args.length} chars).`)
+        let response = `✓ System prompt set (${args.length} chars).`
+        if (currentSessionId) {
+            response += '\n\n⚠️ Session cleared. A new session will start with your next message.'
+        }
+        await sendResponse(response)
     }
 
     private async handlePromptAppendCommand(
@@ -231,15 +252,34 @@ export class ConversationManager extends EventEmitter {
         }
 
         if (args.toLowerCase() === 'clear' || args.toLowerCase() === 'reset') {
+            // Clear session since system prompt affects conversation context
+            const currentSessionId = this.backend.getSessionId()
+            if (currentSessionId) {
+                this.backend.setSessionId(undefined)
+                this.history.clear()
+            }
             this.backend.setSystemPromptAppend(undefined)
-            await sendResponse('✓ Prompt append cleared.')
+            let response = '✓ Prompt append cleared.'
+            if (currentSessionId) {
+                response +=
+                    '\n\n⚠️ Session cleared. A new session will start with your next message.'
+            }
+            await sendResponse(response)
             return
         }
 
+        // Clear session since system prompt affects conversation context
+        const currentSessionId = this.backend.getSessionId()
+        if (currentSessionId) {
+            this.backend.setSessionId(undefined)
+            this.history.clear()
+        }
         this.backend.setSystemPromptAppend(args)
-        await sendResponse(
-            `✓ Text will be appended to default system prompt (${args.length} chars).`
-        )
+        let response = `✓ Text will be appended to default system prompt (${args.length} chars).`
+        if (currentSessionId) {
+            response += '\n\n⚠️ Session cleared. A new session will start with your next message.'
+        }
+        await sendResponse(response)
     }
 
     private async handleSessionCommand(
