@@ -14,9 +14,25 @@ Bridge WhatsApp with Claude Code - interact with your files via WhatsApp message
 
 ## Installation
 
-### Download Pre-built Binary (Recommended)
+### Quick Install (Recommended)
 
-**Option 1: Download from GitHub Releases (easiest)**
+Run this command to automatically download and install the latest version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/dsebastien/whatsapp-claude-agent/main/install.sh | bash
+```
+
+This will:
+
+- Detect your platform (Linux/macOS/Windows) and architecture (x64/arm64)
+- Download the latest release
+- Install to `~/.local/bin` (configurable via `INSTALL_DIR` env var)
+
+After installation, you may need to add `~/.local/bin` to your PATH if it's not already there.
+
+### Manual Download
+
+**Option 1: Download from GitHub Releases**
 
 Visit the [GitHub Releases page](https://github.com/dsebastien/whatsapp-claude-agent/releases) and download the appropriate binary for your platform:
 
