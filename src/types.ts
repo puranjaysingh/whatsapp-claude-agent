@@ -38,7 +38,7 @@ export const ConfigSchema = z.object({
     sessionPath: z.string().default('~/.whatsapp-claude-agent/session'),
     model: z.string().default('claude-sonnet-4-20250514'),
     maxTurns: z.number().optional(),
-    processMissed: z.boolean().default(true),
+    processMissed: z.boolean().default(false),
     missedThresholdMins: z.number().default(60),
     verbose: z.boolean().default(false),
     systemPrompt: z.string().optional(),

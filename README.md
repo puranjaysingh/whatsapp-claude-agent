@@ -391,7 +391,7 @@ Example configuration:
     "sessionPath": "~/.whatsapp-claude-agent/session",
     "model": "sonnet",
     "maxTurns": 50,
-    "processMissed": true,
+    "processMissed": false,
     "missedThresholdMins": 60,
     "verbose": false,
     "agentName": "My Custom Agent",
@@ -413,7 +413,7 @@ All CLI options can be configured via the config file. Here's the full reference
 | `sessionPath`         | `-s, --session`          | WhatsApp session directory                                    |
 | `model`               | `--model`                | Claude model to use (supports shorthands)                     |
 | `maxTurns`            | `--max-turns`            | Maximum conversation turns                                    |
-| `processMissed`       | `--process-missed`       | Process messages received while offline (default: `true`)     |
+| `processMissed`       | `--process-missed`       | Process messages received while offline (default: `false`)    |
 | `missedThresholdMins` | `--missed-threshold`     | Only process messages from last N minutes (default: `60`)     |
 | `verbose`             | `-v, --verbose`          | Enable verbose logging (default: `false`)                     |
 | `agentName`           | `--agent-name`           | Agent identity name (auto-generated if omitted)               |
