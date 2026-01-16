@@ -4,7 +4,7 @@ Deploy your own WhatsApp Claude Agent in minutes.
 
 ## Quick Start
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/YOUR_TEMPLATE_ID)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.com/deploy/EzLiyl?referralCode=IMTR9I&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 > **Note:** Replace `YOUR_TEMPLATE_ID` with your actual Railway template ID after creating it.
 
