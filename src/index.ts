@@ -7,6 +7,7 @@ import { SDKBackend } from './claude/sdk-backend.ts'
 import { ConversationManager } from './conversation/manager.ts'
 import { phoneToJid } from './utils/phone.ts'
 import type { Config, AgentEvent, IncomingMessage, PermissionRequest } from './types.ts'
+import { startQRServer, setQR, setAuthenticated, clearQR } from './qr-server'
 
 async function main() {
     // Handle --update flag first (ignores all other options)
@@ -30,7 +31,8 @@ async function main() {
 
     // Create logger
     const logger = createLogger(config.verbose)
-
+    const port = parseInt(process.env.PORT || '3000', 10)
+    startQRServer(port)
     logger.info('Starting WhatsApp Claude Agent...')
     logger.info(
         `Agent: ${config.agentIdentity.name}@${config.agentIdentity.host} ${config.agentIdentity.folder}/`
@@ -92,6 +94,18 @@ async function main() {
     // Track the current message sender for permission requests
     let currentSenderJid: string | null = null
 
+    //qr code event handlers
+    whatsapp.on('event', async (event: AgentEvent) => {
+        if (event.type === 'qr') {
+            setQR(event.qr)
+        }
+        if (event.type === 'authenticated' || event.type === 'ready') {
+            setAuthenticated()
+        }
+        if (event.type === 'disconnected') {
+            clearQR()
+        }
+    })
     // Set up event handlers
     whatsapp.on('event', async (event: AgentEvent) => {
         switch (event.type) {
