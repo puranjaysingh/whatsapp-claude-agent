@@ -1,581 +1,641 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Documentation - WhatsApp Claude Agent</title>
-  <meta name="description" content="Complete setup guide for deploying your WhatsApp Claude Agent.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0f1a;
-      color: #e0e0e0;
-      line-height: 1.7;
-    }
-
-    /* Navigation */
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 700;
-      color: #25D366;
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 30px;
-    }
-
-    .nav-links a {
-      color: #a0a0a0;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: #ffffff;
-    }
-
-    /* Layout */
-    .docs-layout {
-      display: grid;
-      grid-template-columns: 250px 1fr;
-      max-width: 1200px;
-      margin: 0 auto;
-      min-height: calc(100vh - 80px);
-    }
-
-    /* Sidebar */
-    .sidebar {
-      padding: 40px 20px;
-      border-right: 1px solid rgba(255,255,255,0.1);
-      position: sticky;
-      top: 0;
-      height: fit-content;
-    }
-
-    .sidebar-section {
-      margin-bottom: 30px;
-    }
-
-    .sidebar-section h4 {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    .sidebar-section a {
-      display: block;
-      color: #a0a0a0;
-      text-decoration: none;
-      font-size: 14px;
-      padding: 8px 0;
-      transition: color 0.2s;
-    }
-
-    .sidebar-section a:hover,
-    .sidebar-section a.active {
-      color: #25D366;
-    }
-
-    /* Main Content */
-    .docs-content {
-      padding: 40px 60px;
-      max-width: 800px;
-    }
-
-    .docs-content h1 {
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 15px;
-      color: #fff;
-    }
-
-    .docs-content h2 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-top: 50px;
-      margin-bottom: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
-    }
-
-    .docs-content h2:first-of-type {
-      border-top: none;
-      margin-top: 30px;
-    }
-
-    .docs-content h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      color: #fff;
-    }
-
-    .docs-content p {
-      margin-bottom: 15px;
-      color: #b0b0b0;
-    }
-
-    .docs-content a {
-      color: #25D366;
-      text-decoration: none;
-    }
-
-    .docs-content a:hover {
-      text-decoration: underline;
-    }
-
-    .docs-content ul,
-    .docs-content ol {
-      margin-bottom: 20px;
-      padding-left: 25px;
-    }
-
-    .docs-content li {
-      margin-bottom: 10px;
-      color: #b0b0b0;
-    }
-
-    .intro-text {
-      font-size: 18px;
-      color: #888;
-      margin-bottom: 30px;
-    }
-
-    /* Code blocks */
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(37, 211, 102, 0.1);
-      color: #25D366;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    pre {
-      background: #1a1a2e;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 20px;
-      overflow-x: auto;
-      margin-bottom: 20px;
-    }
-
-    pre code {
-      background: none;
-      padding: 0;
-      color: #e0e0e0;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .code-comment {
-      color: #666;
-    }
-
-    /* Callout boxes */
-    .callout {
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .callout-info {
-      background: rgba(59, 130, 246, 0.1);
-      border-left: 4px solid #3b82f6;
-    }
-
-    .callout-warning {
-      background: rgba(245, 158, 11, 0.1);
-      border-left: 4px solid #f59e0b;
-    }
-
-    .callout-success {
-      background: rgba(37, 211, 102, 0.1);
-      border-left: 4px solid #25D366;
-    }
-
-    .callout-title {
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #fff;
-    }
-
-    .callout p {
-      margin-bottom: 0;
-    }
-
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 25px;
-    }
-
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    th {
-      font-weight: 600;
-      color: #fff;
-      background: rgba(255,255,255,0.03);
-    }
-
-    td {
-      color: #b0b0b0;
-    }
-
-    td code {
-      font-size: 13px;
-    }
-
-    /* Step boxes */
-    .step-box {
-      background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 20px;
-    }
-
-    .step-box h4 {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #fff;
-    }
-
-    .step-badge {
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    /* Screenshots placeholder */
-    .screenshot {
-      background: #1a1a2e;
-      border: 1px dashed rgba(255,255,255,0.2);
-      border-radius: 10px;
-      padding: 60px 20px;
-      text-align: center;
-      color: #666;
-      margin-bottom: 20px;
-    }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .docs-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        display: none;
-      }
-
-      .docs-content {
-        padding: 30px 20px;
-      }
-
-      nav {
-        padding: 20px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Navigation -->
-  <nav>
-    <a href="index.html" class="logo">WhatsApp Claude</a>
-    <div class="nav-links">
-      <a href="docs.html" class="active">Docs</a>
-      <a href="https://github.com/YOUR_USERNAME/whatsapp-claude-agent" target="_blank">GitHub</a>
-    </div>
-  </nav>
-
-  <div class="docs-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-section">
-        <h4>Getting Started</h4>
-        <a href="#overview">Overview</a>
-        <a href="#prerequisites">Prerequisites</a>
-        <a href="#deployment">Deployment</a>
-      </div>
-      <div class="sidebar-section">
-        <h4>Configuration</h4>
-        <a href="#environment-variables">Environment Variables</a>
-        <a href="#permission-modes">Permission Modes</a>
-      </div>
-      <div class="sidebar-section">
-        <h4>Usage</h4>
-        <a href="#scanning-qr">Scanning QR Code</a>
-        <a href="#chatting">Chatting with Claude</a>
-        <a href="#commands">WhatsApp Commands</a>
-      </div>
-      <div class="sidebar-section">
-        <h4>Reference</h4>
-        <a href="#troubleshooting">Troubleshooting</a>
-        <a href="#costs">Costs</a>
-        <a href="#security">Security</a>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="docs-content">
-      <h1>Documentation</h1>
-      <p class="intro-text">Complete guide to deploying and using your WhatsApp Claude Agent.</p>
-
-      <!-- Overview -->
-      <h2 id="overview">Overview</h2>
-      <p>WhatsApp Claude Agent connects Claude AI to WhatsApp, allowing you to chat with Claude directly from your phone. The agent runs on your own infrastructure (Railway) using your own API keys.</p>
-
-      <p>Key features:</p>
-      <ul>
-        <li>Full Claude AI capabilities via WhatsApp</li>
-        <li>File operations in a configured working directory</li>
-        <li>Session persistence across restarts</li>
-        <li>Phone number whitelisting for security</li>
-        <li>Multiple permission modes for different use cases</li>
-      </ul>
-
-      <!-- Prerequisites -->
-      <h2 id="prerequisites">Prerequisites</h2>
-      <p>Before you begin, you'll need:</p>
-
-      <table>
-        <tr>
-          <th>Requirement</th>
-          <th>Where to Get It</th>
-        </tr>
-        <tr>
-          <td>Anthropic API Key</td>
-          <td><a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></td>
-        </tr>
-        <tr>
-          <td>Railway Account</td>
-          <td><a href="https://railway.app/" target="_blank">railway.app</a> (free tier available)</td>
-        </tr>
-        <tr>
-          <td>WhatsApp Account</td>
-          <td>Phone with WhatsApp installed</td>
-        </tr>
-      </table>
-
-      <div class="callout callout-info">
-        <div class="callout-title">About Costs</div>
-        <p>Railway's free tier works but may not persist sessions. For reliable operation, the paid tier (~$5/mo) is recommended. Anthropic charges per API usage — see <a href="#costs">Costs</a> section.</p>
-      </div>
-
-      <!-- Deployment -->
-      <h2 id="deployment">Deployment</h2>
-      <p>Follow these steps to deploy your WhatsApp Claude Agent:</p>
-
-      <div class="step-box">
-        <h4><span class="step-badge">1</span> Click Deploy Button</h4>
-        <p>Go to the <a href="index.html">homepage</a> and click the "Deploy on Railway" button. You'll be redirected to Railway to configure your deployment.</p>
-      </div>
-
-      <div class="step-box">
-        <h4><span class="step-badge">2</span> Configure Environment Variables</h4>
-        <p>Railway will prompt you to enter two required values:</p>
-        <table>
-          <tr>
-            <th>Variable</th>
-            <th>Value</th>
-            <th>Example</th>
-          </tr>
-          <tr>
-            <td><code>ANTHROPIC_API_KEY</code></td>
-            <td>Your API key from Anthropic</td>
-            <td><code>sk-ant-api03-xxx...</code></td>
-          </tr>
-          <tr>
-            <td><code>WHATSAPP_WHITELIST</code></td>
-            <td>Your phone number with country code</td>
-            <td><code>+14155551234</code></td>
-          </tr>
-        </table>
-      </div>
-
-      <div class="step-box">
-        <h4><span class="step-badge">3</span> Deploy and Wait</h4>
-        <p>Click "Deploy" and wait approximately 2-3 minutes for Railway to build and start your container. You can watch the progress in the Railway dashboard.</p>
-      </div>
-
-      <div class="step-box">
-        <h4><span class="step-badge">4</span> Get Your Deployment URL</h4>
-        <p>Once deployed, Railway will provide a public URL like <code>https://your-app.up.railway.app</code>. Click on your service to find this URL.</p>
-      </div>
-
-      <div class="step-box">
-        <h4><span class="step-badge">5</span> Scan QR Code</h4>
-        <p>Open the deployment URL in your browser. You'll see a QR code. Scan it with WhatsApp:</p>
-        <ol>
-          <li>Open WhatsApp on your phone</li>
-          <li>Go to <strong>Settings → Linked Devices</strong></li>
-          <li>Tap <strong>"Link a Device"</strong></li>
-          <li>Point your camera at the QR code</li>
-        </ol>
-      </div>
-
-      <div class="callout callout-success">
-        <div class="callout-title">You're Ready!</div>
-        <p>Once authenticated, you can start sending messages to Claude via WhatsApp.</p>
-      </div>
-
-      <!-- Environment Variables -->
-      <h2 id="environment-variables">Environment Variables</h2>
-      <p>Configure your agent's behavior with these environment variables:</p>
-
-      <table>
-        <tr>
-          <th>Variable</th>
-          <th>Required</th>
-          <th>Default</th>
-          <th>Description</th>
-        </tr>
-        <tr>
-          <td><code>ANTHROPIC_API_KEY</code></td>
-          <td>Yes</td>
-          <td>—</td>
-          <td>Your Anthropic API key</td>
-        </tr>
-        <tr>
-          <td><code>WHATSAPP_WHITELIST</code></td>
-          <td>Yes</td>
-          <td>—</td>
-          <td>Allowed phone number(s)</td>
-        </tr>
-        <tr>
-          <td><code>PERMISSION_MODE</code></td>
-          <td>No</td>
-          <td><code>default</code></td>
-          <td>Claude's permission level</td>
-        </tr>
-        <tr>
-          <td><code>WORKING_DIRECTORY</code></td>
-          <td>No</td>
-          <td><code>/app</code></td>
-          <td>Directory for file operations</td>
-        </tr>
-        <tr>
-          <td><code>AGENT_NAME</code></td>
-          <td>No</td>
-          <td><code>Claude</code></td>
-          <td>Custom name for the agent</td>
-        </tr>
-        <tr>
-          <td><code>MODEL</code></td>
-          <td>No</td>
-          <td><code>claude-sonnet-4-20250514</code></td>
-          <td>Claude model to use</td>
-        </tr>
-        <tr>
-          <td><code>PORT</code></td>
-          <td>No</td>
-          <td><code>3000</code></td>
-          <td>QR server port</td>
-        </tr>
-      </table>
-
-      <!-- Permission Modes -->
-      <h2 id="permission-modes">Permission Modes</h2>
-      <p>Control what Claude can do with different permission modes:</p>
-
-      <table>
-        <tr>
-          <th>Mode</th>
-          <th>Description</th>
-        </tr>
-        <tr>
-          <td><code>default</code></td>
-          <td>Claude asks for permission before making changes</td>
-        </tr>
-        <tr>
-          <td><code>acceptEdits</code></td>
-          <td>Claude can edit files without asking, but asks for other operations</td>
-        </tr>
-        <tr>
-          <td><code>bypassPermissions</code></td>
-          <td>Claude can perform any operation without asking</td>
-        </tr>
-        <tr>
-          <td><code>plan</code></td>
-          <td>Claude plans actions but doesn't execute them</td>
-        </tr>
-      </table>
-
-      <div class="callout callout-warning">
-        <div class="callout-title">Use with Caution</div>
-        <p><code>bypassPermissions</code> mode gives Claude full control. Only use this if you understand the implications.</p>
-      </div>
-
-      <!-- Scanning QR -->
-      <h2 id="scanning-qr">Scanning QR Code</h2>
-
-      <h3>Via Web Page (Recommended)</h3>
-      <p>Open your deployment URL in any browser. The page will show:</p>
-      <ul>
-        <li><strong>"Initializing..."</strong> — Waiting for WhatsApp connection</li>
-        <li><strong>QR Code</strong> — Ready to scan</li>
-        <li><strong>"Connected!"</strong> — Successfully authenticated</li>
-      </ul>
-      <p>The page auto-refreshes every few seconds, so you'll see updates automatically.</p>
-
-      <h3>Via Deployment Logs</h3>
-      <p>Alternatively, view the QR code in Railway's deployment logs:</p>
-      <ol>
-        <li>Go to your Railway dashboard</li>
-        <li>Click on your deployment</li>
-        <li>Click "View Logs"</li>
-        <li>Find the ASCII QR code in the output</li>
-      </ol>
-
-      <!-- Chatting -->
-      <h2 id="chatting">Chatting with Claude</h2>
-      <p>Once connected, simply send messages via WhatsApp. Claude will respond to any message from your whitelisted number.</p>
-
-      <h3>Example Conversations</h3>
-      <pre><code><span class="code-comment">You:</span> What's the capital of France?
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Documentation - WhatsApp Claude Agent</title>
+        <meta
+            name="description"
+            content="Complete setup guide for deploying your WhatsApp Claude Agent."
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family:
+                    'Inter',
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    'Segoe UI',
+                    Roboto,
+                    sans-serif;
+                background: #0f0f1a;
+                color: #e0e0e0;
+                line-height: 1.7;
+            }
+
+            /* Navigation */
+            nav {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 40px;
+                max-width: 1200px;
+                margin: 0 auto;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .logo {
+                font-size: 20px;
+                font-weight: 700;
+                color: #25d366;
+                text-decoration: none;
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 30px;
+            }
+
+            .nav-links a {
+                color: #a0a0a0;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+            .nav-links a:hover,
+            .nav-links a.active {
+                color: #ffffff;
+            }
+
+            /* Layout */
+            .docs-layout {
+                display: grid;
+                grid-template-columns: 250px 1fr;
+                max-width: 1200px;
+                margin: 0 auto;
+                min-height: calc(100vh - 80px);
+            }
+
+            /* Sidebar */
+            .sidebar {
+                padding: 40px 20px;
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+                position: sticky;
+                top: 0;
+                height: fit-content;
+            }
+
+            .sidebar-section {
+                margin-bottom: 30px;
+            }
+
+            .sidebar-section h4 {
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #666;
+                margin-bottom: 12px;
+            }
+
+            .sidebar-section a {
+                display: block;
+                color: #a0a0a0;
+                text-decoration: none;
+                font-size: 14px;
+                padding: 8px 0;
+                transition: color 0.2s;
+            }
+
+            .sidebar-section a:hover,
+            .sidebar-section a.active {
+                color: #25d366;
+            }
+
+            /* Main Content */
+            .docs-content {
+                padding: 40px 60px;
+                max-width: 800px;
+            }
+
+            .docs-content h1 {
+                font-size: 36px;
+                font-weight: 700;
+                margin-bottom: 15px;
+                color: #fff;
+            }
+
+            .docs-content h2 {
+                font-size: 24px;
+                font-weight: 600;
+                margin-top: 50px;
+                margin-bottom: 20px;
+                padding-top: 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                color: #fff;
+            }
+
+            .docs-content h2:first-of-type {
+                border-top: none;
+                margin-top: 30px;
+            }
+
+            .docs-content h3 {
+                font-size: 18px;
+                font-weight: 600;
+                margin-top: 30px;
+                margin-bottom: 15px;
+                color: #fff;
+            }
+
+            .docs-content p {
+                margin-bottom: 15px;
+                color: #b0b0b0;
+            }
+
+            .docs-content a {
+                color: #25d366;
+                text-decoration: none;
+            }
+
+            .docs-content a:hover {
+                text-decoration: underline;
+            }
+
+            .docs-content ul,
+            .docs-content ol {
+                margin-bottom: 20px;
+                padding-left: 25px;
+            }
+
+            .docs-content li {
+                margin-bottom: 10px;
+                color: #b0b0b0;
+            }
+
+            .intro-text {
+                font-size: 18px;
+                color: #888;
+                margin-bottom: 30px;
+            }
+
+            /* Code blocks */
+            code {
+                font-family: 'JetBrains Mono', monospace;
+                background: rgba(37, 211, 102, 0.1);
+                color: #25d366;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            pre {
+                background: #1a1a2e;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                overflow-x: auto;
+                margin-bottom: 20px;
+            }
+
+            pre code {
+                background: none;
+                padding: 0;
+                color: #e0e0e0;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .code-comment {
+                color: #666;
+            }
+
+            /* Callout boxes */
+            .callout {
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .callout-info {
+                background: rgba(59, 130, 246, 0.1);
+                border-left: 4px solid #3b82f6;
+            }
+
+            .callout-warning {
+                background: rgba(245, 158, 11, 0.1);
+                border-left: 4px solid #f59e0b;
+            }
+
+            .callout-success {
+                background: rgba(37, 211, 102, 0.1);
+                border-left: 4px solid #25d366;
+            }
+
+            .callout-title {
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #fff;
+            }
+
+            .callout p {
+                margin-bottom: 0;
+            }
+
+            /* Tables */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 25px;
+            }
+
+            th,
+            td {
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            th {
+                font-weight: 600;
+                color: #fff;
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+            td {
+                color: #b0b0b0;
+            }
+
+            td code {
+                font-size: 13px;
+            }
+
+            /* Step boxes */
+            .step-box {
+                background: linear-gradient(
+                    145deg,
+                    rgba(255, 255, 255, 0.03) 0%,
+                    rgba(255, 255, 255, 0.01) 100%
+                );
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 25px;
+                margin-bottom: 20px;
+            }
+
+            .step-box h4 {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 12px;
+                color: #fff;
+            }
+
+            .step-badge {
+                background: linear-gradient(135deg, #25d366, #128c7e);
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+            /* Screenshots placeholder */
+            .screenshot {
+                background: #1a1a2e;
+                border: 1px dashed rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                padding: 60px 20px;
+                text-align: center;
+                color: #666;
+                margin-bottom: 20px;
+            }
+
+            /* Responsive */
+            @media (max-width: 900px) {
+                .docs-layout {
+                    grid-template-columns: 1fr;
+                }
+
+                .sidebar {
+                    display: none;
+                }
+
+                .docs-content {
+                    padding: 30px 20px;
+                }
+
+                nav {
+                    padding: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav>
+            <a href="index.html" class="logo">WhatsApp Claude</a>
+            <div class="nav-links">
+                <a href="docs.html" class="active">Docs</a>
+                <a href="https://github.com/YOUR_USERNAME/whatsapp-claude-agent" target="_blank"
+                    >GitHub</a
+                >
+            </div>
+        </nav>
+
+        <div class="docs-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h4>Getting Started</h4>
+                    <a href="#overview">Overview</a>
+                    <a href="#prerequisites">Prerequisites</a>
+                    <a href="#deployment">Deployment</a>
+                </div>
+                <div class="sidebar-section">
+                    <h4>Configuration</h4>
+                    <a href="#environment-variables">Environment Variables</a>
+                    <a href="#permission-modes">Permission Modes</a>
+                </div>
+                <div class="sidebar-section">
+                    <h4>Usage</h4>
+                    <a href="#scanning-qr">Scanning QR Code</a>
+                    <a href="#chatting">Chatting with Claude</a>
+                    <a href="#commands">WhatsApp Commands</a>
+                </div>
+                <div class="sidebar-section">
+                    <h4>Reference</h4>
+                    <a href="#troubleshooting">Troubleshooting</a>
+                    <a href="#costs">Costs</a>
+                    <a href="#security">Security</a>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="docs-content">
+                <h1>Documentation</h1>
+                <p class="intro-text">
+                    Complete guide to deploying and using your WhatsApp Claude Agent.
+                </p>
+
+                <!-- Overview -->
+                <h2 id="overview">Overview</h2>
+                <p>
+                    WhatsApp Claude Agent connects Claude AI to WhatsApp, allowing you to chat with
+                    Claude directly from your phone. The agent runs on your own infrastructure
+                    (Railway) using your own API keys.
+                </p>
+
+                <p>Key features:</p>
+                <ul>
+                    <li>Full Claude AI capabilities via WhatsApp</li>
+                    <li>File operations in a configured working directory</li>
+                    <li>Session persistence across restarts</li>
+                    <li>Phone number whitelisting for security</li>
+                    <li>Multiple permission modes for different use cases</li>
+                </ul>
+
+                <!-- Prerequisites -->
+                <h2 id="prerequisites">Prerequisites</h2>
+                <p>Before you begin, you'll need:</p>
+
+                <table>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Where to Get It</th>
+                    </tr>
+                    <tr>
+                        <td>Anthropic API Key</td>
+                        <td>
+                            <a href="https://console.anthropic.com/" target="_blank"
+                                >console.anthropic.com</a
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Railway Account</td>
+                        <td>
+                            <a href="https://railway.app/" target="_blank">railway.app</a> (free
+                            tier available)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>WhatsApp Account</td>
+                        <td>Phone with WhatsApp installed</td>
+                    </tr>
+                </table>
+
+                <div class="callout callout-info">
+                    <div class="callout-title">About Costs</div>
+                    <p>
+                        Railway's free tier works but may not persist sessions. For reliable
+                        operation, the paid tier (~$5/mo) is recommended. Anthropic charges per API
+                        usage — see <a href="#costs">Costs</a> section.
+                    </p>
+                </div>
+
+                <!-- Deployment -->
+                <h2 id="deployment">Deployment</h2>
+                <p>Follow these steps to deploy your WhatsApp Claude Agent:</p>
+
+                <div class="step-box">
+                    <h4><span class="step-badge">1</span> Click Deploy Button</h4>
+                    <p>
+                        Go to the <a href="index.html">homepage</a> and click the "Deploy on
+                        Railway" button. You'll be redirected to Railway to configure your
+                        deployment.
+                    </p>
+                </div>
+
+                <div class="step-box">
+                    <h4><span class="step-badge">2</span> Configure Environment Variables</h4>
+                    <p>Railway will prompt you to enter two required values:</p>
+                    <table>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Value</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td><code>ANTHROPIC_API_KEY</code></td>
+                            <td>Your API key from Anthropic</td>
+                            <td><code>sk-ant-api03-xxx...</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>WHATSAPP_WHITELIST</code></td>
+                            <td>Your phone number with country code</td>
+                            <td><code>+14155551234</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="step-box">
+                    <h4><span class="step-badge">3</span> Deploy and Wait</h4>
+                    <p>
+                        Click "Deploy" and wait approximately 2-3 minutes for Railway to build and
+                        start your container. You can watch the progress in the Railway dashboard.
+                    </p>
+                </div>
+
+                <div class="step-box">
+                    <h4><span class="step-badge">4</span> Get Your Deployment URL</h4>
+                    <p>
+                        Once deployed, Railway will provide a public URL like
+                        <code>https://your-app.up.railway.app</code>. Click on your service to find
+                        this URL.
+                    </p>
+                </div>
+
+                <div class="step-box">
+                    <h4><span class="step-badge">5</span> Scan QR Code</h4>
+                    <p>
+                        Open the deployment URL in your browser. You'll see a QR code. Scan it with
+                        WhatsApp:
+                    </p>
+                    <ol>
+                        <li>Open WhatsApp on your phone</li>
+                        <li>Go to <strong>Settings → Linked Devices</strong></li>
+                        <li>Tap <strong>"Link a Device"</strong></li>
+                        <li>Point your camera at the QR code</li>
+                    </ol>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-title">You're Ready!</div>
+                    <p>
+                        Once authenticated, you can start sending messages to Claude via WhatsApp.
+                    </p>
+                </div>
+
+                <!-- Environment Variables -->
+                <h2 id="environment-variables">Environment Variables</h2>
+                <p>Configure your agent's behavior with these environment variables:</p>
+
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Required</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>ANTHROPIC_API_KEY</code></td>
+                        <td>Yes</td>
+                        <td>—</td>
+                        <td>Your Anthropic API key</td>
+                    </tr>
+                    <tr>
+                        <td><code>WHATSAPP_WHITELIST</code></td>
+                        <td>Yes</td>
+                        <td>—</td>
+                        <td>Allowed phone number(s)</td>
+                    </tr>
+                    <tr>
+                        <td><code>PERMISSION_MODE</code></td>
+                        <td>No</td>
+                        <td><code>default</code></td>
+                        <td>Claude's permission level</td>
+                    </tr>
+                    <tr>
+                        <td><code>WORKING_DIRECTORY</code></td>
+                        <td>No</td>
+                        <td><code>/app</code></td>
+                        <td>Directory for file operations</td>
+                    </tr>
+                    <tr>
+                        <td><code>AGENT_NAME</code></td>
+                        <td>No</td>
+                        <td><code>Claude</code></td>
+                        <td>Custom name for the agent</td>
+                    </tr>
+                    <tr>
+                        <td><code>MODEL</code></td>
+                        <td>No</td>
+                        <td><code>claude-sonnet-4-20250514</code></td>
+                        <td>Claude model to use</td>
+                    </tr>
+                    <tr>
+                        <td><code>PORT</code></td>
+                        <td>No</td>
+                        <td><code>3000</code></td>
+                        <td>QR server port</td>
+                    </tr>
+                </table>
+
+                <!-- Permission Modes -->
+                <h2 id="permission-modes">Permission Modes</h2>
+                <p>Control what Claude can do with different permission modes:</p>
+
+                <table>
+                    <tr>
+                        <th>Mode</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>default</code></td>
+                        <td>Claude asks for permission before making changes</td>
+                    </tr>
+                    <tr>
+                        <td><code>acceptEdits</code></td>
+                        <td>Claude can edit files without asking, but asks for other operations</td>
+                    </tr>
+                    <tr>
+                        <td><code>bypassPermissions</code></td>
+                        <td>Claude can perform any operation without asking</td>
+                    </tr>
+                    <tr>
+                        <td><code>plan</code></td>
+                        <td>Claude plans actions but doesn't execute them</td>
+                    </tr>
+                </table>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">Use with Caution</div>
+                    <p>
+                        <code>bypassPermissions</code> mode gives Claude full control. Only use this
+                        if you understand the implications.
+                    </p>
+                </div>
+
+                <!-- Scanning QR -->
+                <h2 id="scanning-qr">Scanning QR Code</h2>
+
+                <h3>Via Web Page (Recommended)</h3>
+                <p>Open your deployment URL in any browser. The page will show:</p>
+                <ul>
+                    <li><strong>"Initializing..."</strong> — Waiting for WhatsApp connection</li>
+                    <li><strong>QR Code</strong> — Ready to scan</li>
+                    <li><strong>"Connected!"</strong> — Successfully authenticated</li>
+                </ul>
+                <p>
+                    The page auto-refreshes every few seconds, so you'll see updates automatically.
+                </p>
+
+                <h3>Via Deployment Logs</h3>
+                <p>Alternatively, view the QR code in Railway's deployment logs:</p>
+                <ol>
+                    <li>Go to your Railway dashboard</li>
+                    <li>Click on your deployment</li>
+                    <li>Click "View Logs"</li>
+                    <li>Find the ASCII QR code in the output</li>
+                </ol>
+
+                <!-- Chatting -->
+                <h2 id="chatting">Chatting with Claude</h2>
+                <p>
+                    Once connected, simply send messages via WhatsApp. Claude will respond to any
+                    message from your whitelisted number.
+                </p>
+
+                <h3>Example Conversations</h3>
+                <pre><code><span class="code-comment">You:</span> What's the capital of France?
 <span class="code-comment">Claude:</span> The capital of France is Paris.
 
 <span class="code-comment">You:</span> Write a Python function to calculate fibonacci numbers
@@ -589,133 +649,155 @@ def fibonacci(n):
 <span class="code-comment">You:</span> Can you help me debug this code? [paste code]
 <span class="code-comment">Claude:</span> I'd be happy to help! Looking at your code...</code></pre>
 
-      <!-- Commands -->
-      <h2 id="commands">WhatsApp Commands</h2>
-      <p>The agent supports special commands you can send via WhatsApp:</p>
+                <!-- Commands -->
+                <h2 id="commands">WhatsApp Commands</h2>
+                <p>The agent supports special commands you can send via WhatsApp:</p>
 
-      <table>
-        <tr>
-          <th>Command</th>
-          <th>Description</th>
-        </tr>
-        <tr>
-          <td><code>/session</code></td>
-          <td>Show current session info</td>
-        </tr>
-        <tr>
-          <td><code>/fork</code></td>
-          <td>Create a branch of the current conversation</td>
-        </tr>
-        <tr>
-          <td><code>/mode [mode]</code></td>
-          <td>Change permission mode</td>
-        </tr>
-        <tr>
-          <td><code>/model [model]</code></td>
-          <td>Change Claude model</td>
-        </tr>
-        <tr>
-          <td><code>/prompt [text]</code></td>
-          <td>Set custom system prompt</td>
-        </tr>
-        <tr>
-          <td><code>/config</code></td>
-          <td>View current configuration</td>
-        </tr>
-      </table>
+                <table>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>/session</code></td>
+                        <td>Show current session info</td>
+                    </tr>
+                    <tr>
+                        <td><code>/fork</code></td>
+                        <td>Create a branch of the current conversation</td>
+                    </tr>
+                    <tr>
+                        <td><code>/mode [mode]</code></td>
+                        <td>Change permission mode</td>
+                    </tr>
+                    <tr>
+                        <td><code>/model [model]</code></td>
+                        <td>Change Claude model</td>
+                    </tr>
+                    <tr>
+                        <td><code>/prompt [text]</code></td>
+                        <td>Set custom system prompt</td>
+                    </tr>
+                    <tr>
+                        <td><code>/config</code></td>
+                        <td>View current configuration</td>
+                    </tr>
+                </table>
 
-      <!-- Troubleshooting -->
-      <h2 id="troubleshooting">Troubleshooting</h2>
+                <!-- Troubleshooting -->
+                <h2 id="troubleshooting">Troubleshooting</h2>
 
-      <h3>QR code not showing</h3>
-      <ul>
-        <li>Wait a moment — the app needs time to initialize</li>
-        <li>Check deployment logs for errors</li>
-        <li>Try redeploying the service</li>
-      </ul>
+                <h3>QR code not showing</h3>
+                <ul>
+                    <li>Wait a moment — the app needs time to initialize</li>
+                    <li>Check deployment logs for errors</li>
+                    <li>Try redeploying the service</li>
+                </ul>
 
-      <h3>QR code expired</h3>
-      <ul>
-        <li>QR codes expire after ~60 seconds</li>
-        <li>Refresh the page or redeploy to get a new one</li>
-      </ul>
+                <h3>QR code expired</h3>
+                <ul>
+                    <li>QR codes expire after ~60 seconds</li>
+                    <li>Refresh the page or redeploy to get a new one</li>
+                </ul>
 
-      <h3>Bot not responding</h3>
-      <ul>
-        <li>Verify your phone number is in <code>WHATSAPP_WHITELIST</code> (with + and country code)</li>
-        <li>Check that <code>ANTHROPIC_API_KEY</code> is valid</li>
-        <li>Review deployment logs for errors</li>
-      </ul>
+                <h3>Bot not responding</h3>
+                <ul>
+                    <li>
+                        Verify your phone number is in <code>WHATSAPP_WHITELIST</code> (with + and
+                        country code)
+                    </li>
+                    <li>Check that <code>ANTHROPIC_API_KEY</code> is valid</li>
+                    <li>Review deployment logs for errors</li>
+                </ul>
 
-      <h3>Session disconnected</h3>
-      <ul>
-        <li>WhatsApp sessions can disconnect periodically</li>
-        <li>Redeploy to generate a new QR code</li>
-        <li>Use Railway's paid tier for persistent storage</li>
-      </ul>
+                <h3>Session disconnected</h3>
+                <ul>
+                    <li>WhatsApp sessions can disconnect periodically</li>
+                    <li>Redeploy to generate a new QR code</li>
+                    <li>Use Railway's paid tier for persistent storage</li>
+                </ul>
 
-      <h3>"Unauthorized" or API errors</h3>
-      <ul>
-        <li>Verify your Anthropic API key is correct</li>
-        <li>Check your Anthropic account has available credits</li>
-        <li>Ensure the API key hasn't been revoked</li>
-      </ul>
+                <h3>"Unauthorized" or API errors</h3>
+                <ul>
+                    <li>Verify your Anthropic API key is correct</li>
+                    <li>Check your Anthropic account has available credits</li>
+                    <li>Ensure the API key hasn't been revoked</li>
+                </ul>
 
-      <!-- Costs -->
-      <h2 id="costs">Costs</h2>
+                <!-- Costs -->
+                <h2 id="costs">Costs</h2>
 
-      <table>
-        <tr>
-          <th>Service</th>
-          <th>Cost</th>
-          <th>Notes</th>
-        </tr>
-        <tr>
-          <td>Railway (Free tier)</td>
-          <td>$0/mo</td>
-          <td>Limited hours, sessions may not persist</td>
-        </tr>
-        <tr>
-          <td>Railway (Paid)</td>
-          <td>~$5/mo</td>
-          <td>Persistent storage, always-on</td>
-        </tr>
-        <tr>
-          <td>Anthropic API</td>
-          <td>Pay per use</td>
-          <td>See <a href="https://www.anthropic.com/pricing" target="_blank">anthropic.com/pricing</a></td>
-        </tr>
-      </table>
+                <table>
+                    <tr>
+                        <th>Service</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>
+                    <tr>
+                        <td>Railway (Free tier)</td>
+                        <td>$0/mo</td>
+                        <td>Limited hours, sessions may not persist</td>
+                    </tr>
+                    <tr>
+                        <td>Railway (Paid)</td>
+                        <td>~$5/mo</td>
+                        <td>Persistent storage, always-on</td>
+                    </tr>
+                    <tr>
+                        <td>Anthropic API</td>
+                        <td>Pay per use</td>
+                        <td>
+                            See
+                            <a href="https://www.anthropic.com/pricing" target="_blank"
+                                >anthropic.com/pricing</a
+                            >
+                        </td>
+                    </tr>
+                </table>
 
-      <div class="callout callout-info">
-        <div class="callout-title">Typical Usage</div>
-        <p>For casual use (a few conversations per day), expect ~$5-15/month total including Railway and API costs.</p>
-      </div>
+                <div class="callout callout-info">
+                    <div class="callout-title">Typical Usage</div>
+                    <p>
+                        For casual use (a few conversations per day), expect ~$5-15/month total
+                        including Railway and API costs.
+                    </p>
+                </div>
 
-      <!-- Security -->
-      <h2 id="security">Security</h2>
+                <!-- Security -->
+                <h2 id="security">Security</h2>
 
-      <h3>What's protected</h3>
-      <ul>
-        <li><strong>API Keys:</strong> Stored as encrypted environment variables in Railway</li>
-        <li><strong>Access Control:</strong> Only whitelisted phone numbers can interact with the bot</li>
-        <li><strong>Your Infrastructure:</strong> Everything runs on your own Railway account</li>
-      </ul>
+                <h3>What's protected</h3>
+                <ul>
+                    <li>
+                        <strong>API Keys:</strong> Stored as encrypted environment variables in
+                        Railway
+                    </li>
+                    <li>
+                        <strong>Access Control:</strong> Only whitelisted phone numbers can interact
+                        with the bot
+                    </li>
+                    <li>
+                        <strong>Your Infrastructure:</strong> Everything runs on your own Railway
+                        account
+                    </li>
+                </ul>
 
-      <h3>Best practices</h3>
-      <ul>
-        <li>Don't share your deployment URL publicly</li>
-        <li>Regularly rotate your Anthropic API key</li>
-        <li>Use <code>default</code> permission mode unless you need more access</li>
-        <li>Monitor your Anthropic usage for unexpected activity</li>
-      </ul>
+                <h3>Best practices</h3>
+                <ul>
+                    <li>Don't share your deployment URL publicly</li>
+                    <li>Regularly rotate your Anthropic API key</li>
+                    <li>Use <code>default</code> permission mode unless you need more access</li>
+                    <li>Monitor your Anthropic usage for unexpected activity</li>
+                </ul>
 
-      <div class="callout callout-warning">
-        <div class="callout-title">WhatsApp Terms of Service</div>
-        <p>Automated WhatsApp usage may violate WhatsApp's Terms of Service. Use at your own risk and avoid high-volume messaging.</p>
-      </div>
-
-    </main>
-  </div>
-</body>
+                <div class="callout callout-warning">
+                    <div class="callout-title">WhatsApp Terms of Service</div>
+                    <p>
+                        Automated WhatsApp usage may violate WhatsApp's Terms of Service. Use at
+                        your own risk and avoid high-volume messaging.
+                    </p>
+                </div>
+            </main>
+        </div>
+    </body>
 </html>

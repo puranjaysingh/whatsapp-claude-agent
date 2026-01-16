@@ -41,8 +41,8 @@ RUN bun run build || true
 RUN mkdir -p /app/.wwebjs_auth /app/.wwebjs_cache \
     && chown -R appuser:appuser /app
 
-# Volume for session persistence across container restarts
-VOLUME ["/app/.wwebjs_auth"]
+# Note: For session persistence, attach a Railway volume to /app/.whatsapp-claude-agent
+# See: https://docs.railway.com/reference/volumes
 
 # Expose port for QR code web server
 EXPOSE 3000
