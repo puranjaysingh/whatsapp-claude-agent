@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y \
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Create non-root user for security with home directory
+RUN groupadd -r appuser && useradd -r -g appuser -m -d /home/appuser appuser
 
 # Set working directory
 WORKDIR /app
@@ -37,8 +37,8 @@ COPY . .
 RUN bun run build || true
 
 # Create directories for WhatsApp session persistence
-RUN mkdir -p /app/.wwebjs_auth /app/.wwebjs_cache \
-    && chown -R appuser:appuser /app
+RUN mkdir -p /app/.whatsapp-claude-agent /home/appuser/.whatsapp-claude-agent \
+    && chown -R appuser:appuser /app /home/appuser
 
 # Note: For session persistence, attach a Railway volume to /app/.whatsapp-claude-agent
 # See: https://docs.railway.com/reference/volumes
@@ -48,6 +48,9 @@ EXPOSE 3000
 
 # Switch to non-root user
 USER appuser
+
+# Set HOME for the non-root user
+ENV HOME=/home/appuser
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
