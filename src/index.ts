@@ -10,6 +10,10 @@ import type { Config, AgentEvent, IncomingMessage, PermissionRequest } from './t
 import { startQRServer, setQR, setAuthenticated, clearQR } from './qr-server'
 
 async function main() {
+    // Start QR server early so health checks pass during startup
+    const port = parseInt(process.env.PORT || '3000', 10)
+    startQRServer(port)
+
     // Handle --update flag first (ignores all other options)
     if (isUpdateFlag(process.argv)) {
         await runUpdate()
@@ -31,8 +35,6 @@ async function main() {
 
     // Create logger
     const logger = createLogger(config.verbose)
-    const port = parseInt(process.env.PORT || '3000', 10)
-    startQRServer(port)
     logger.info('Starting WhatsApp Claude Agent...')
     logger.info(
         `Agent: ${config.agentIdentity.name}@${config.agentIdentity.host} ${config.agentIdentity.folder}/`

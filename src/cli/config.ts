@@ -188,13 +188,20 @@ export interface CLIOptions {
 
 export function parseConfig(cliOptions: CLIOptions): Config {
     // Resolve directory early since we need it for config loading and agent name generation
-    const directory = expandPath(cliOptions.directory || process.cwd())
+    const directory = expandPath(
+        cliOptions.directory || process.env.WORKING_DIRECTORY || process.cwd()
+    )
 
     // Load config file from working directory (or explicit path)
     const fileConfig = loadConfigFile(cliOptions.config, directory)
 
-    // Resolve model shorthand (from CLI or file config)
-    const rawModel = cliOptions.model || fileConfig.model
+    // Read from environment variables (for Railway/Docker deployment)
+    const envWhitelist = process.env.WHATSAPP_WHITELIST
+        ? process.env.WHATSAPP_WHITELIST.split(',').map((n) => n.trim())
+        : undefined
+
+    // Resolve model shorthand (from CLI, env var, or file config)
+    const rawModel = cliOptions.model || process.env.MODEL || fileConfig.model
     let resolvedModel: string | undefined
     if (rawModel) {
         resolvedModel = resolveModelShorthand(rawModel)
@@ -206,20 +213,22 @@ export function parseConfig(cliOptions: CLIOptions): Config {
         }
     }
 
-    // Resolve agent name: CLI option > config file > undefined (will generate random)
+    // Resolve agent name: CLI option > env var > config file > undefined (will generate random)
     const customAgentName =
-        normalizeAgentName(cliOptions.agentName) || normalizeAgentName(fileConfig.agentName)
+        normalizeAgentName(cliOptions.agentName) ||
+        normalizeAgentName(process.env.AGENT_NAME) ||
+        normalizeAgentName(fileConfig.agentName)
 
     // Generate agent identity with all components
     const agentIdentity = generateAgentIdentity(directory, customAgentName)
 
-    // Build merged config (CLI options override file config)
+    // Build merged config (CLI options override env vars override file config)
     const merged = {
-        directory: cliOptions.directory || fileConfig.directory,
-        mode: cliOptions.mode || fileConfig.mode,
+        directory: cliOptions.directory || process.env.WORKING_DIRECTORY || fileConfig.directory,
+        mode: cliOptions.mode || process.env.PERMISSION_MODE || fileConfig.mode,
         whitelist: cliOptions.whitelist
             ? cliOptions.whitelist.split(',').map((n) => n.trim())
-            : fileConfig.whitelist,
+            : envWhitelist || fileConfig.whitelist,
         sessionPath: cliOptions.session
             ? expandPath(cliOptions.session)
             : fileConfig.sessionPath

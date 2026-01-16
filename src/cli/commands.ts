@@ -130,10 +130,10 @@ export function parseArgs(args: string[]): Config {
     program.parse(args)
     const options = program.opts<CLIOptions>()
 
-    // Check for whitelist - it can come from CLI or config file in working directory
-    const directory = options.directory || process.cwd()
+    // Check for whitelist - it can come from CLI, env var, or config file in working directory
+    const directory = options.directory || process.env.WORKING_DIRECTORY || process.cwd()
     const fileConfig = loadConfigFile(options.config, directory)
-    const hasWhitelist = options.whitelist || fileConfig.whitelist
+    const hasWhitelist = options.whitelist || process.env.WHATSAPP_WHITELIST || fileConfig.whitelist
 
     if (!hasWhitelist) {
         console.error(`Error: Missing required option '--whitelist'
